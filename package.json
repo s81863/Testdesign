@@ -1,6 +1,6 @@
 {
-  "name": "streetview-controls",
-  "description": "Samples for Google Maps JavaScript",
+  "name": "Testdesign",
+  "description": "Based on samples for Google Maps JavaScript",
   "version": "2.1.4",
   "keywords": [
     "google",
@@ -8,13 +8,13 @@
     "maps",
     "samples"
   ],
-  "homepage": "https://github.com/googlemaps/js-samples#readme",
+  "homepage": "https://github.com/s81863/Testdesign/#readme",
   "bugs": {
-    "url": "https://github.com/googlemaps/js-samples/issues"
+    "url": "https://github.com/s81863/Testdesign/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/googlemaps/js-samples.git"
+    "url": "git+https://github.com/81863/Testdesign.git"
   },
   "files": [],
   "license": "Apache-2.0",
