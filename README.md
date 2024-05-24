@@ -30,4 +30,4 @@ Now simply open a Browser of your choice and go to localhost:5173 You should see
 ## Feedback
 
 For feedback related to this sample, please open a new issue on
-[GitHub](https://github.com/googlemaps/js-samples/issues).
+[GitHub](https://github.com/s81863/Testdesign/issues).
