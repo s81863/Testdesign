@@ -25,7 +25,7 @@ To finally start, execute the following commands while you are in the directory
 npm i
 npm start
 ```
-Open a Browser and go to localhost:5173
+Now simply open a Browser of your choice and go to localhost:5173 You should see the test now.
 
 ## Feedback
 
