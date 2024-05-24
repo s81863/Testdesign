@@ -6,11 +6,26 @@ We modified it to display 8 static Street View Panoramas sequentially. Additiona
 
 ## Setup
 
+You need to install [node js](https://nodejs.org/en) and [Git](https://git-scm.com/downloads) first.
+When both of these are running you can open up Git Bash or Windows Powershell to clone this repository to your system.
+```sh
+git clone -b Testdesign https://github.com/s81863/Testdesign.git
+```
+You'll also need to install [file-saver](https://www.npmjs.com/package/file-saver). User Powershell for that.
+```sh
+npm install file-saver --save
+```
+Then open up Powershell once more and move into the directory you just cloned. Typically it is saved to C:\Users\User\Testdesign
+
+```sh
+cd Path\to\Testdesign
+```
+To finally start, execute the following commands while you are in the directory
 ```sh
 npm i
-npm start  # development
-npm run build  # production
+npm start
 ```
+Open a Browser and go to localhost:5173
 
 ## Feedback
 
