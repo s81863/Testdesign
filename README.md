@@ -11,7 +11,7 @@ When both of these are running you can open up Git Bash or Windows Powershell to
 ```sh
 git clone Testdesign https://github.com/s81863/Testdesign.git
 ```
-You'll also need to install [file-saver](https://www.npmjs.com/package/file-saver). User Powershell for that.
+You'll also need to install [file-saver](https://www.npmjs.com/package/file-saver). Use Powershell for that.
 ```sh
 npm install file-saver --save
 ```
