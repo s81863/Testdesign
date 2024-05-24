@@ -1,0 +1,148 @@
+/**
+ * @license
+ * Copyright 2019 Google LLC. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+/* 
+ * Always set the map height explicitly to define the size of the div element
+ * that contains the map. 
+ */
+#map {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+/* 
+ * Optional: Makes the sample page fill the window. 
+ */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#submit-button {
+  position: absolute;
+  bottom: 8%;
+  right: 50%;
+  transform: translate(50%, 50%);
+  background-color: #4CAF50; /* Green background */
+  color: white; /* White text */
+  border: none; /* Remove borders */
+  padding: 10px 28px; /* Padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Inline-block */
+  font-size: 14px; /* Increase font size */
+  margin: 2px 1px; /* Margins for spacing */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 12px; /* Rounded corners */
+  transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition for hover effects */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+#submit-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Larger shadow on hover */
+}
+
+
+#map-container {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 350px;
+  height: 250px;
+  z-index: 10;
+  transition: width 0.3s, height 0.3s;
+}
+
+#map-container.expanded {
+  width: 60%;
+  height: 60%;
+  opacity: 1;
+}
+
+
+#google-map {
+  width: 100%;
+  height: 100%;
+  opacity: 0.75;
+}
+
+#expand-map-button {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background-color: #fff;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 1;
+}
+
+
+#expand-map-button:hover {
+  background-color: #ddd;
+}
+
+#expand-map-button.expanded {
+  transform: rotate(45deg);
+}
+
+#finished-message,
+#start-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 20;
+  background-color: white;
+  padding: 20px;
+  border: 2px solid #ddd;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#start-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.modal {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  background-color: white;
+  border: 2px solid #ddd;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+}
+
+.modal-content label {
+  margin: 10px 0;
+}
+
+#modal-ok-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
