@@ -1,7 +1,8 @@
-# Google Maps JavaScript Sample
+# Test Design
 
-This sample is generated from @googlemaps/js-samples located at
+This sample is based on the @googlemaps/js-samples located at
 https://github.com/googlemaps/js-samples.
+We modified it to display 8 static Street View Panoramas sequentially. Additionally a Map of type google-map is displayed as well.
 
 ## Setup
 
