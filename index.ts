@@ -1,9 +1,12 @@
 import { saveAs } from 'file-saver';
 
 let currentIndex = 0;
-const coordinates = [
-  { lat: 54.237717, lng: 9.0863045 },
-  { lat: 52.518406, lng: 13.4011736 },
+let mapIndex;
+
+// Liste der Koordinaten, auf die die Karten zunächst zentriert sein sollen.
+const mapCenterList = [
+  { lat: 50.0968306, lng: 7.1398799 }, // Bereits auf den Standort zentriert
+  { lat: 54.2349728, lng: 9.0930605 }, // Bereits auf den Standort zentriert
   { lat: 52.5164116, lng: 13.3794872 },
   { lat: 52.5090565, lng: 13.3766477 },
   { lat: 52.5054908, lng: 13.3341694 },
@@ -12,18 +15,73 @@ const coordinates = [
   { lat: 52.544155, lng: 13.3534112 }
 ];
 
+// Liste der Kartengrenzen: Definiert die Maximale Ausdehnung der Karte in Nord-,Süd-,West- und Ostrichtung
+const mapBoundList = [
+{north: 50.124091880676104,
+ south: 50.0743414485289,
+ west: 7.076158718181713,
+ east: 7.191487769936919},
+ {north: 54.25470793542802,
+ south: 54.22125044166433,
+ west: 9.038729714655673,
+ east: 9.124903724902042}
+ /*
+ {north: xx,
+ south: xx,
+ west: xx,
+ east: xx},
+ {north: xx,
+ south: xx,
+ west: xx,
+ east: xx},
+ {north: xx,
+ south: xx,
+ west: xx,
+ east: xx},
+ {north: xx,
+ south: xx,
+ west: xx,
+ east: xx},
+ {north: xx,
+ south: xx,
+ west: xx,
+ east: xx},
+ {north: xx,
+ south: xx,
+ west: xx,
+ east: xx}
+ */
+]
+
+let userGroup: 'A' | 'B';				
+const standardMapType = 'roadmap';
+const hybridMapType = 'hybrid';
+
+// Liste der Panoramen
+const panoramaIds = [
+'AF1QipPuRXrm2MDpqaFmG7aN07sS1VlV7IUd2S8oHafA',
+'1mErEioMdEynGwxzmMItsA',
+'AF1QipPVGMqgKoSQ1-ZTQeaKPkFy2Eno4HiIkUacc2mw',
+'QbiSnfO4__Qz66L2mxWPzA',
+'AF1QipPAhReORTm9oICvSeam2p--aGkNcEleeA4H3NE1',
+'I7JWsLigdVOhYffwZFURTw',
+'qXC1-SfnJSygM1g08x2kwQ',
+'oPZVNF3kAUfSG8_3Mg2z9A'
+];
+
 const fixedMapCenter = { lat: 52.5194748, lng: 13.3842489 };
 
 let panorama: google.maps.StreetViewPanorama;
 let map: google.maps.Map;
 let currentMarker: google.maps.Marker | null = null;
-let markersData: string[] = ['timestamp,index,lat,lng,distance,areaknowledge'];
+let markersData: string[] = ['ts_pano_loaded,ts_marker_set,index,lat,lng,distance,areaknowledge'];
+let tsPanoLoaded: string;
 
-function initPano() {
+function initPano(callback) {
   panorama = new google.maps.StreetViewPanorama(
     document.getElementById("map"),
     {
-      position: coordinates[currentIndex],
+      pano: panoramaIds[currentIndex],
       addressControlOptions: {
         position: google.maps.ControlPosition.BOTTOM_CENTER,
       },
@@ -35,17 +93,44 @@ function initPano() {
       keyboardShortcuts: false
     }
   );
+  panorama.setPov({
+    heading: 30,
+    zoom: 0,
+    pitch: 0
+  });
 
-  initMap();
+  tsPanoLoaded = new Date().toISOString();
+
+  panorama.addListener('pano_changed', () => {
+    tsPanoLoaded = new Date().toISOString();
+    console.log(`Current Panorama ID: ${panorama.getPano()}`);
+    console.log(`Timestamp Panorama Loaded: ${tsPanoLoaded}`);
+  });
+
+  panorama.addListener('status_changed', () => {
+    if (panorama.getStatus() !== 'OK') {
+      console.error(`Failed to load panorama ID: ${panoramaIds[currentIndex]}`);
+    }
+  });
+
+  mapIndex = 0;
+  callback();
 }
 
+
 function initMap() {
+  const mapType = (userGroup === 'A' && mapIndex % 2 === 0) || (userGroup === 'B' && mapIndex % 2 !== 0) ? standardMapType : hybridMapType;    
+  console.log(userGroup, mapIndex ); 
   map = new google.maps.Map(document.getElementById("google-map"), {
-    center: fixedMapCenter,
+    center: mapCenterList[currentIndex],
+	restriction: {
+		latLngBounds: mapBoundList[currentIndex],
+		strictBounds: false,
+	},
     zoom: 12,
     disableDefaultUI: true,
     clickableIcons: false,
-	mapTypeId: 'hybrid'
+    mapTypeId: mapType
   });
 
   map.addListener('click', (event: google.maps.MapMouseEvent) => {
@@ -56,15 +141,17 @@ function initMap() {
     gestureHandling: 'greedy',
     zoomControl: true,
   });
+  mapIndex++;
 }
 
 function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
   const timestamp = new Date().toISOString();
   const panoIndex = currentIndex + 1;
   const distance = google.maps.geometry.spherical.computeDistanceBetween(
-    new google.maps.LatLng(coordinates[currentIndex]),
+    new google.maps.LatLng(mapCenterList[currentIndex]),
     location
   );
+  
 
   if (currentMarker) {
     currentMarker.setMap(null);
@@ -79,14 +166,25 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
   console.log(`Marker added at index ${panoIndex} with timestamp ${timestamp}`);
   console.log(`Distance from panorama view: ${distance} meters`);
 
-  const markerData = `${timestamp},${panoIndex},${location.lat()},${location.lng()},${distance},`;
-  markersData.push(markerData);
+  const markerData = `${tsPanoLoaded},${timestamp},${panoIndex},${location.lat()},${location.lng()},${distance},`;
+
+  
+  const existingMarkerIndex = markersData.findIndex(data => data.split(",")[2] === panoIndex.toString());
+
+  if (existingMarkerIndex !== -1) {
+    
+    markersData[existingMarkerIndex] = markerData;
+  } else {
+    
+    markersData.push(markerData);
+  }
 }
 
+
 function changeView() {
-  currentIndex = (currentIndex + 1) % coordinates.length;
-  panorama.setPosition(coordinates[currentIndex]);
-  map.setCenter(fixedMapCenter);
+  currentIndex = (currentIndex + 1) % panoramaIds.length;
+  panorama.setPano(panoramaIds[currentIndex]);
+  initMap();
 
   if (currentMarker) {
     currentMarker.setMap(null);
@@ -109,21 +207,26 @@ function toggleMapSize() {
 
   if (mapContainer.classList.contains("expanded")) {
     expandButton.innerHTML = "&#8600;";
-	document.getElementById("google-map").style.opacity = "1.0";
+    document.getElementById("google-map").style.opacity = "1.0";
   } else {
     expandButton.innerHTML = "&#8598;";
-	document.getElementById("google-map").style.opacity = "0.75";
+    document.getElementById("google-map").style.opacity = "0.75";
   }
 
   google.maps.event.trigger(map, "resize");
 }
 
 function startGame() {
+  userGroup = Math.random() < 0.5 ? 'A' : 'B';
   document.getElementById("start-message").style.display = "none";
   document.getElementById("map").style.display = "block";
   document.getElementById("map-container").style.display = "block";
-  document.getElementById("next-button").style.display = "block";
+  //document.getElementById("next-button").style.display = "block";
   document.getElementById("submit-button").style.display = "block";
+  initPano(() => {
+    // Callback to initMap after mapIndex is set
+    initMap();
+  });
 }
 
 function showModal() {
@@ -148,7 +251,6 @@ function handleCheckboxChange(changedCheckbox: HTMLInputElement, otherCheckbox: 
   okButton.disabled = !changedCheckbox.checked && !otherCheckbox.checked;
 }
 
-
 function hideModal() {
   const yesCheckbox = document.getElementById("checkbox-yes") as HTMLInputElement;
   const noCheckbox = document.getElementById("checkbox-no") as HTMLInputElement;
@@ -168,21 +270,23 @@ function hideModal() {
   yesCheckbox.checked = false;
   noCheckbox.checked = false;
 
-  if (currentIndex === coordinates.length - 1) {
-    const csvContent = markersData.join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'markers_data.csv');
+  if (currentIndex === mapCenterList.length - 1) {
+  const csvContent = markersData.join("\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const now = new Date();
+  const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+  const fileName = `data_${userGroup}_${formattedDate}.csv`;
+  saveAs(blob, fileName);
 
-    document.getElementById("finished-message").style.display = "block";
-    document.getElementById("map").style.display = "none";
-    document.getElementById("map-container").style.display = "none";
-    document.getElementById("next-button").style.display = "none";
-    document.getElementById("submit-button").style.display = "none";
-  } else {
-    changeView();
-  }
+  document.getElementById("finished-message").style.display = "block";
+  document.getElementById("map").style.display = "none";
+  document.getElementById("map-container").style.display = "none";
+  document.getElementById("next-button").style.display = "none";
+  document.getElementById("submit-button").style.display = "none";
+} else {
+  changeView();
 }
-
+}
 
 declare global {
   interface Window {
