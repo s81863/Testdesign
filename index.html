@@ -6,7 +6,7 @@
 -->
 <html>
   <head>
-    <title>Geomedien Studie: 360° Panoramen</title>
+    <title>Street View Controls</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <link rel="stylesheet" type="text/css" href="./style.css" />
@@ -15,21 +15,47 @@
   <body>
 	<div id="start-message">
       <h1>Willkommen zu unserer Studie!</h1>
-	  <h2>Bitte lesen Sie sich die Regeln gut durch!</h2>
-      <p>In dieser Studie werden Sie insgesamt acht 360&deg; Panoramen von verschiedenen Orten sehen. Sie k&ouml;nnen die Panoramen beliebig drehen, vergr&ouml;&szlig;ern oder verkleinern
-	  um sich zu orientieren. Unten rechts im Bildschirm sehen Sie eine interaktive Karte, die Sie ggf. erweitern k&ouml;nnen. 
-	  Ihre Aufgabe besteht darin, den Standort des Panoramas auf der Karte zu ermitteln. Nutzen Sie dazu alle M&ouml;glichkeiten die Sie in diesem Test haben. Suchen Sie nach Landmarken,
-	  markanten Objekten oder Sonstigem, dass Ihnen hilft den Standort zu finden. Wenn Sie glauben den richtigen Ort gefunden zu haben, klicken Sie an der gew&uuml;nschten Stelle auf die Karte um einen Marker abzusetzen.
-	  Klicken Sie erneut, wird der vorherige Marker ersetzt. Sie k&ouml;nnen die Position also beliebig oft ver&auml;ndern. Um sich festzulegen und zum n&auml;chsten Panorama zu wechseln, 
-	  klicken Sie auf "Standort einreichen". Sie kommen dann aber nicht mehr zum vorherigen Panorama zur&uuml;ck.</p>
+      <p>In dieser Studie geht es um die Raumwahrnehmung anhand von 360&deg; Panoramen. Sie werden dazu eine Reihe von Google StreetView Panoramen und eine Karte sehen. 
+	  Ihre Aufgabe besteht darin, den Standort des Panoramas auf der Karte zu ermitteln. Der Kartentyp ist entweder die 
+	  Google Maps Standardkarte oder die Luftbild-Hybrid-Ansicht. Nach jedem Panorama &auml;ndert sich die Karte zum jeweils anderen Typ. Mit welchem Sie
+	  starten h&auml;ngt von Ihrer Gruppe ab. Wenn Sie auf Start klicken, werden Sie per Zufall einer von zwei Gruppen zugeteilt. Au&szlig;erdem wird Ihnen anhand eines Beispiels
+	  der genaue Testablauf erl&auml;utert.
+	  </p>
       <button id="start-button">Start</button>
     </div>
+	
+	<div id="tutorial" style="display: none;">
+      <div id="tutorial-popups">
+        <div id="tutorial-step-1" class="tutorial-popup" style="display: none;">
+          <p>Hier sehen Sie ein Beispielpanorama. Verwenden Sie die Maus, um sich umzusehen und hineinzuzoomen.</p>
+          <button id="tutorial-next-1">Weiter</button>
+        </div>
+        <div id="tutorial-step-2" class="tutorial-popup" style="display: none;">
+          <p>Unten rechts sehen Sie eine interaktive Karte, die sie mit dem Pfeil vergr&ouml;&szlig;ern bzw. verkleinern k&ouml;nnen. Sie ist auf eine bestimmte Region begrenzt.
+		  Verwenden Sie die Karte, um den Standort des Panoramas zu bestimmen. Der Standort jedes Panoramas liegt immer innerhalb des Kartenausschnitts.</p>
+          <button id="tutorial-next-2">Weiter</button>
+        </div>
+        <div id="tutorial-step-3" class="tutorial-popup" style="display: none;">
+          <p>Wenn Sie meinen den Standort gefunden zu haben, setzen Sie einen Marker auf der Karte ab, um den Standort zu markieren. Sie k&ouml;nnen beliebig oft klicken. Der
+		  Marker wird dann aktualisiert.
+		  Klicken Sie anschlie&szlig;end auf "Standort einreichen".</p>
+          <button id="tutorial-next-3">Weiter</button>
+        </div>
+        <div id="tutorial-step-4" class="tutorial-popup" style="display: none;">
+          <p>Beantworten Sie die nun die Frage. Wenn Sie auf OK klicken, geht der eigentliche Test auch schon los. Wenden Sie die gleichen Schritte auf alle acht folgenden
+		  Panoramen an. Viel Spa&szlig;!</p>
+        </div>
+      </div>
+    </div>
+	
     <div id="map" style="display: none;"></div>
+	
     <div id="map-container" style="display: none;">
       <div id="google-map"></div>
       <button id="expand-map-button">&#8598;</button> <!-- Arrow icon for expand -->
-	  <button id="submit-button">Standort einreichen</button> <!-- New submit button -->
+	  <button id="submit-button" style="display: none;">Standort einreichen</button> <!-- New submit button -->
     </div>
+	
 	
 	<div id="finished-message" style="display: none;">
       <h1>Fertig! Danke f&uuml;r Ihre Teilname</h1>
@@ -37,6 +63,7 @@
 	
 	<div id="area-knowledge-modal" class="modal" style="display: none;">
       <div class="modal-content">
+		<button id="modal-exit-button" class="modal-button">&times;</button>
         <p>Kennen Sie das Gebiet?</p>
         <label>
           <input type="checkbox" id="checkbox-yes" name="area-knowledge"> Ja
@@ -44,6 +71,7 @@
         <label>
           <input type="checkbox" id="checkbox-no" name="area-knowledge"> Nein
         </label>
+		
         <button id="modal-ok-button" disabled>OK</button>
       </div>
     </div>
