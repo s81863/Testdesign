@@ -58,8 +58,9 @@ const mapBoundList = [
  */
 ]
 
-let userGroup: 'A' | 'B';				
-const standardMapType = 'roadmap';
+let userGroup: 'A' | 'B';			// Variable für die Testgruppe 	
+// Konstanten um die Google map auf einen anderen Typ zu stellen
+const standardMapType = 'roadmap';              
 const hybridMapType = 'hybrid';
 
 // Liste der Panoramen
@@ -75,6 +76,7 @@ const panoramaIds = [
 'oPZVNF3kAUfSG8_3Mg2z9A'
 ];
 
+// Diese Konstante wird nur für das Tutorial gebraucht
 const fixedMapCenter = { lat: 52.5194748, lng: 13.3842489 };
 
 let panorama: google.maps.StreetViewPanorama;
@@ -83,11 +85,12 @@ let currentMarker: google.maps.Marker | null = null;
 let markersData: string[] = ['ts_pano_loaded,ts_marker_set,index,lat,lng,distance,areaknowledge'];
 let tsPanoLoaded: string;
 
+//Initializieren des Panoramas
 function initPano(callback) {
   panorama = new google.maps.StreetViewPanorama(
     document.getElementById("map"),
     {
-      pano: panoramaIds[currentIndex],
+      pano: panoramaIds[currentIndex],			// Panorama-ID ist abhängig von currentIndex
       addressControlOptions: {
         position: google.maps.ControlPosition.BOTTOM_CENTER,
       },
@@ -99,20 +102,21 @@ function initPano(callback) {
       keyboardShortcuts: false
     }
   );
+	// Drehung des Panoramas einstellen (Könnte man mit einer entsprechenden Liste auch von currentIndex abhängig machen 
   panorama.setPov({
     heading: 30,
     zoom: 0,
     pitch: 0
   });
 
-  tsPanoLoaded = new Date().toISOString();
-
+  tsPanoLoaded = new Date().toISOString(); // Timestamp für den Zeitpunkt, wo das Panorama geladen wurde.
+  // Aktualisieren, wenn zum nächsten Panorama gewechselt wird
   panorama.addListener('pano_changed', () => {
     tsPanoLoaded = new Date().toISOString();
     console.log(`Current Panorama ID: ${panorama.getPano()}`);
     console.log(`Timestamp Panorama Loaded: ${tsPanoLoaded}`);
   });
-
+  // Debugging
   panorama.addListener('status_changed', () => {
     if (panorama.getStatus() !== 'OK') {
       console.error(`Failed to load panorama ID: ${panoramaIds[currentIndex]}`);
@@ -123,22 +127,23 @@ function initPano(callback) {
   callback();
 }
 
-
+// Karte initialisieren
 function initMap() {
+  // Kartentyp ist abhängig von der Gruppe und dem momentanen Map Index
   const mapType = (userGroup === 'A' && mapIndex % 2 === 0) || (userGroup === 'B' && mapIndex % 2 !== 0) ? standardMapType : hybridMapType;    
   console.log(userGroup, mapIndex ); 
   map = new google.maps.Map(document.getElementById("google-map"), {
-    center: mapCenterList[currentIndex],
+    center: mapCenterList[currentIndex],  				// Punkt auf den die Karte zentriert ist (abhängig von currentIndex)
 	restriction: {
-		latLngBounds: mapBoundList[currentIndex],
+		latLngBounds: mapBoundList[currentIndex],  		// Kartengrenzen (ebenfalls abhängig von currentIndex)
 		strictBounds: false,
 	},
-    zoom: 15,
+    zoom: 15,								// Zoomstufe (ggf. auch je nach Panorama anpassen)
     disableDefaultUI: true,
     clickableIcons: false,
     mapTypeId: mapType
   });
-
+  // Marker durch Klicken auf die Karte hinzufügen
   map.addListener('click', (event: google.maps.MapMouseEvent) => {
     addMarker(event.latLng);
   });
@@ -151,14 +156,14 @@ function initMap() {
 }
 
 function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
-  const timestamp = new Date().toISOString();
-  const panoIndex = currentIndex + 1;
-  const distance = google.maps.geometry.spherical.computeDistanceBetween(
+  const timestamp = new Date().toISOString();					// Zeitpunkt des Hinzufügens eines Markers
+  const panoIndex = currentIndex + 1;						// Nummer des aktuellen Panoramas (+1 damit Start bei 1)
+  const distance = google.maps.geometry.spherical.computeDistanceBetween(	// Eher entfernen oder anpassen, da map Center nicht den Standort darstellt
     new google.maps.LatLng(mapCenterList[currentIndex]),
     location
   );
   
-
+  // Begrenzung auf 1 Marker
   if (currentMarker) {
     currentMarker.setMap(null);
   }
@@ -172,8 +177,10 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
   console.log(`Marker added at index ${panoIndex} with timestamp ${timestamp}`);
   console.log(`Distance from panorama view: ${distance} meters`);
 
-  const markerData = `${tsPanoLoaded},${timestamp},${panoIndex},${location.lat()},${location.lng()},${distance},`;
+  // Daten für die Csv-Datei	
+  const markerData = `${tsPanoLoaded},${timestamp},${panoIndex},${location.lat()},${location.lng()},${distance},`; 
 
+  // Beispielpanorama exkludieren	
   if (currentIndex !== 0) {
     const existingMarkerIndex = markersData.findIndex(data => data.split(",")[2] === panoIndex.toString());
 
@@ -186,7 +193,7 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
   
 }
 
-
+// Zum nächsten Panorama wechseln
 function changeView() {
   currentIndex = (currentIndex + 1) % panoramaIds.length;
   panorama.setPano(panoramaIds[currentIndex]);
@@ -233,6 +240,7 @@ function toggleMapSize() {
   google.maps.event.trigger(map, "resize");
 }
 
+// Wird ausgeführt, sobald der User auf Start geklickt hat
 function startGame() {
   userGroup = Math.random() < 0.5 ? 'A' : 'B';
   document.getElementById("start-message").style.display = "none";
@@ -246,6 +254,7 @@ function startGame() {
   });
 }
 
+// Fenster für Frage nach Ortskenntnissen zeigen
 function showModal() {
   const modal = document.getElementById("area-knowledge-modal");
   modal.style.display = "block";
@@ -259,7 +268,7 @@ function showModal() {
 
   yesCheckbox.addEventListener("change", () => handleCheckboxChange(yesCheckbox, noCheckbox));
   noCheckbox.addEventListener("change", () => handleCheckboxChange(noCheckbox, yesCheckbox));
-
+  // Fenster schließen: resettet eventuell markierte Felder
   exitButton.addEventListener("click", () => {
     modal.style.display = "none";
 	yesCheckbox.checked = false;
@@ -267,7 +276,7 @@ function showModal() {
   });
 }
 
-
+// Uncheckt das jeweils andere Feld, wenn der User seine Meinung ändert
 function handleCheckboxChange(changedCheckbox: HTMLInputElement, otherCheckbox: HTMLInputElement) {
   if (changedCheckbox.checked) {
     otherCheckbox.checked = false;
@@ -276,10 +285,11 @@ function handleCheckboxChange(changedCheckbox: HTMLInputElement, otherCheckbox: 
   okButton.disabled = !changedCheckbox.checked && !otherCheckbox.checked;
 }
 
+// Fenster schließen und Antwort den Daten für die CSV-Datei zufügen
 function hideModal() {
   const yesCheckbox = document.getElementById("checkbox-yes") as HTMLInputElement;
   const noCheckbox = document.getElementById("checkbox-no") as HTMLInputElement;
-
+  // Es muss eine Antwort ausgewählt sein
   if (!yesCheckbox.checked && !noCheckbox.checked) {
     alert("Please select an option before proceeding.");
     return;
@@ -296,7 +306,7 @@ function hideModal() {
 
   yesCheckbox.checked = false;
   noCheckbox.checked = false;
-
+  // Wenn das letzte Panorama bearbeitet wurde
   if (currentIndex === mapCenterList.length - 1) {
     const csvContent = markersData.join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -308,10 +318,10 @@ function hideModal() {
     document.getElementById("finished-message").style.display = "block";
     document.getElementById("map").style.display = "none";
     document.getElementById("map-container").style.display = "none";
-    document.getElementById("next-button").style.display = "none";
+    //document.getElementById("next-button").style.display = "none";
     document.getElementById("submit-button").style.display = "none";
   } else {
-    changeView();
+    changeView();  							// Ansonsten zum nächsten Panorama gehen
   }
 }
 
