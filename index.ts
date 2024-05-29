@@ -5,6 +5,7 @@ let mapIndex;
 
 // Liste der Koordinaten, auf die die Karten zunächst zentriert sein sollen.
 const mapCenterList = [
+  {lat: 52.5214119, lng: 13.4071451},	
   { lat: 50.0968306, lng: 7.1398799 }, // Bereits auf den Standort zentriert
   { lat: 54.2349728, lng: 9.0930605 }, // Bereits auf den Standort zentriert
   { lat: 52.5164116, lng: 13.3794872 },
@@ -17,7 +18,11 @@ const mapCenterList = [
 
 // Liste der Kartengrenzen: Definiert die Maximale Ausdehnung der Karte in Nord-,Süd-,West- und Ostrichtung
 const mapBoundList = [
-{north: 50.124091880676104,
+ {north: 52.52474700402667,
+ south: 52.5160037125997,
+ west: 13.395073993266973,
+ east: 13.425542404237454},
+ {north: 50.124091880676104,
  south: 50.0743414485289,
  west: 7.076158718181713,
  east: 7.191487769936919},
@@ -59,6 +64,7 @@ const hybridMapType = 'hybrid';
 
 // Liste der Panoramen
 const panoramaIds = [
+'8Qbx2O5-RZpDBN5ToxMvUQ',								//Tutorial Panorama
 'AF1QipPuRXrm2MDpqaFmG7aN07sS1VlV7IUd2S8oHafA',
 '1mErEioMdEynGwxzmMItsA',
 'AF1QipPVGMqgKoSQ1-ZTQeaKPkFy2Eno4HiIkUacc2mw',
@@ -127,7 +133,7 @@ function initMap() {
 		latLngBounds: mapBoundList[currentIndex],
 		strictBounds: false,
 	},
-    zoom: 12,
+    zoom: 15,
     disableDefaultUI: true,
     clickableIcons: false,
     mapTypeId: mapType
@@ -168,16 +174,16 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
 
   const markerData = `${tsPanoLoaded},${timestamp},${panoIndex},${location.lat()},${location.lng()},${distance},`;
 
-  
-  const existingMarkerIndex = markersData.findIndex(data => data.split(",")[2] === panoIndex.toString());
+  if (currentIndex !== 0) {
+    const existingMarkerIndex = markersData.findIndex(data => data.split(",")[2] === panoIndex.toString());
 
-  if (existingMarkerIndex !== -1) {
-    
-    markersData[existingMarkerIndex] = markerData;
-  } else {
-    
-    markersData.push(markerData);
+    if (existingMarkerIndex !== -1) {
+      markersData[existingMarkerIndex] = markerData;
+    } else {
+      markersData.push(markerData);
+    }
   }
+  
 }
 
 
@@ -185,20 +191,31 @@ function changeView() {
   currentIndex = (currentIndex + 1) % panoramaIds.length;
   panorama.setPano(panoramaIds[currentIndex]);
   initMap();
+    if (currentIndex == 1) {
+	document.getElementById('tutorial')!.style.display = 'none';
+  }
 
   if (currentMarker) {
     currentMarker.setMap(null);
     currentMarker = null;
   }
+
 }
 
 function submitMarker() {
-  if (markersData.length > 1) {
+  if (!currentMarker) {
+    console.log('No marker set.');
+    return;
+  }
+
+  if (markersData.length > 1 || currentIndex === 0) {
     showModal();
   } else {
     console.log('No markers to submit.');
   }
 }
+
+
 
 function toggleMapSize() {
   const mapContainer = document.getElementById("map-container");
@@ -220,9 +237,9 @@ function startGame() {
   userGroup = Math.random() < 0.5 ? 'A' : 'B';
   document.getElementById("start-message").style.display = "none";
   document.getElementById("map").style.display = "block";
-  document.getElementById("map-container").style.display = "block";
+  //document.getElementById("map-container").style.display = "block";
   //document.getElementById("next-button").style.display = "block";
-  document.getElementById("submit-button").style.display = "block";
+  
   initPano(() => {
     // Callback to initMap after mapIndex is set
     initMap();
@@ -234,6 +251,7 @@ function showModal() {
   modal.style.display = "block";
   
   const okButton = document.getElementById("modal-ok-button") as HTMLButtonElement;
+  const exitButton = document.getElementById("modal-exit-button") as HTMLButtonElement;
   okButton.disabled = true;
 
   const yesCheckbox = document.getElementById("checkbox-yes") as HTMLInputElement;
@@ -241,7 +259,14 @@ function showModal() {
 
   yesCheckbox.addEventListener("change", () => handleCheckboxChange(yesCheckbox, noCheckbox));
   noCheckbox.addEventListener("change", () => handleCheckboxChange(noCheckbox, yesCheckbox));
+
+  exitButton.addEventListener("click", () => {
+    modal.style.display = "none";
+	yesCheckbox.checked = false;
+	noCheckbox.checked = false;
+  });
 }
+
 
 function handleCheckboxChange(changedCheckbox: HTMLInputElement, otherCheckbox: HTMLInputElement) {
   if (changedCheckbox.checked) {
@@ -262,31 +287,76 @@ function hideModal() {
 
   const modal = document.getElementById("area-knowledge-modal");
   modal.style.display = "none";
-  
+
   const areaKnowledge = yesCheckbox.checked ? 'yes' : 'no';
-  
-  markersData[markersData.length - 1] += areaKnowledge;
+
+  if (currentIndex !== 0) {
+    markersData[markersData.length - 1] += areaKnowledge;
+  }
 
   yesCheckbox.checked = false;
   noCheckbox.checked = false;
 
   if (currentIndex === mapCenterList.length - 1) {
-  const csvContent = markersData.join("\n");
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const now = new Date();
-  const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-  const fileName = `data_${userGroup}_${formattedDate}.csv`;
-  saveAs(blob, fileName);
+    const csvContent = markersData.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const now = new Date();
+    const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+    const fileName = `data_${userGroup}_${formattedDate}.csv`;
+    saveAs(blob, fileName);
 
-  document.getElementById("finished-message").style.display = "block";
-  document.getElementById("map").style.display = "none";
-  document.getElementById("map-container").style.display = "none";
-  document.getElementById("next-button").style.display = "none";
-  document.getElementById("submit-button").style.display = "none";
-} else {
-  changeView();
+    document.getElementById("finished-message").style.display = "block";
+    document.getElementById("map").style.display = "none";
+    document.getElementById("map-container").style.display = "none";
+    document.getElementById("next-button").style.display = "none";
+    document.getElementById("submit-button").style.display = "none";
+  } else {
+    changeView();
+  }
 }
+
+
+function showTutorialStep(step: number) {
+  const steps = document.querySelectorAll('.tutorial-popup');
+  steps.forEach((el, index) => {
+    el.style.display = (index === step) ? 'block' : 'none';
+  });
 }
+
+function initTutorial() {
+
+  let currentStep = 0;
+  showTutorialStep(currentStep);
+
+  document.getElementById('tutorial-next-1')!.onclick = () => {
+    currentStep = 1;
+	document.getElementById("map-container").style.display = "block";
+    showTutorialStep(currentStep);
+  };
+
+  document.getElementById('tutorial-next-2')!.onclick = () => {
+    currentStep = 2;
+	document.getElementById("submit-button").style.display = "block";
+    showTutorialStep(currentStep);
+  };
+
+  document.getElementById('tutorial-next-3')!.onclick = () => {
+    currentStep = 3;
+    showTutorialStep(currentStep);
+  };
+
+  document.getElementById('tutorial-finish')!.onclick = () => {
+    document.getElementById('tutorial')!.style.display = 'none';
+  };
+}
+
+document.getElementById('start-button')!.onclick = () => {
+  document.getElementById('start-message')!.style.display = 'none';
+  document.getElementById('tutorial')!.style.display = 'block';
+  startGame();
+  initTutorial();
+};
+
 
 declare global {
   interface Window {
@@ -295,6 +365,7 @@ declare global {
 }
 window.initPano = initPano;
 
+// Dieser Teil deaktiviert die Navigation mit den Pfeiltasten
 window.addEventListener('keydown', (event) => {
   if (
     (
@@ -318,7 +389,7 @@ window.addEventListener('keydown', (event) => {
 window.addEventListener('load', () => {
   document.getElementById("submit-button").addEventListener("click", submitMarker);
   document.getElementById("expand-map-button").addEventListener("click", toggleMapSize);
-  document.getElementById("start-button").addEventListener("click", startGame);
+  //document.getElementById("start-button").addEventListener("click", startGame);
   document.getElementById("modal-ok-button").addEventListener("click", hideModal);
 });
 
