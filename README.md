@@ -9,7 +9,7 @@ We modified it to display 8 static Street View Panoramas sequentially. Additiona
 You need to install [node js](https://nodejs.org/en) and [Git](https://git-scm.com/downloads) first.
 When both of these are running you can open up Git Bash or Windows Powershell to clone this repository to your system.
 ```sh
-git clone Testdesign https://github.com/s81863/Testdesign.git
+git clone https://github.com/s81863/Testdesign.git
 ```
 You'll also need to install [file-saver](https://www.npmjs.com/package/file-saver). Use Powershell for that.
 ```sh
