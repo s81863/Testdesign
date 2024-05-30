@@ -2,7 +2,7 @@
 
 This test is based on the @googlemaps/js-samples located at
 https://github.com/googlemaps/js-samples.
-We modified it to display 8 static Street View Panoramas sequentially. Additionally a Map of type google-map is displayed as well.
+We modified it to display 8 static Street View Panoramas sequentially. Additionally a Map of type google-map is displayed.
 
 ## Setup
 
