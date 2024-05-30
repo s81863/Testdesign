@@ -65,7 +65,7 @@ const hybridMapType = 'hybrid';
 
 // Liste der Panoramen
 const panoramaIds = [
-'8Qbx2O5-RZpDBN5ToxMvUQ',								//Tutorial Panorama
+'8Qbx2O5-RZpDBN5ToxMvUQ',	//Tutorial Panorama
 'AF1QipPuRXrm2MDpqaFmG7aN07sS1VlV7IUd2S8oHafA',
 '1mErEioMdEynGwxzmMItsA',
 'AF1QipPVGMqgKoSQ1-ZTQeaKPkFy2Eno4HiIkUacc2mw',
@@ -340,18 +340,19 @@ function initTutorial() {
 
   document.getElementById('tutorial-next-1')!.onclick = () => {
     currentStep = 1;
-	document.getElementById("map-container").style.display = "block";
+	  document.getElementById("map-container").style.display = "block";     // Karte erst anzeigen, wenn User auf Weiter geklickt hat.
     showTutorialStep(currentStep);
   };
 
   document.getElementById('tutorial-next-2')!.onclick = () => {
     currentStep = 2;
-	document.getElementById("submit-button").style.display = "block";
+	  document.getElementById("submit-button").style.display = "block";     // Same for the Submit Button
     showTutorialStep(currentStep);
   };
 
   document.getElementById('tutorial-next-3')!.onclick = () => {
     currentStep = 3;
+    document.getElementById("modal-ok-button").style.display = "block";   // ... OK Button
     showTutorialStep(currentStep);
   };
 
