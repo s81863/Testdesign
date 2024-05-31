@@ -31,22 +31,29 @@
           <button id="tutorial-next-1">Weiter</button>
         </div>
         <div id="tutorial-step-2" class="tutorial-popup" style="display: none;">
-          <p>Unten rechts sehen Sie eine interaktive Karte, die sie mit dem Pfeil vergr&ouml;&szlig;ern bzw. verkleinern k&ouml;nnen. Sie ist auf eine bestimmte Region begrenzt.
-		  Verwenden Sie die Karte, um den Standort des Panoramas zu bestimmen. Der Standort jedes Panoramas liegt immer innerhalb des Kartenausschnitts.</p>
+          <p>Unten rechts sehen Sie eine interaktive Karte, die sie mit dem Pfeil vergr&ouml;&szlig;ern bzw. verkleinern k&ouml;nnen.
+		         Verwenden Sie die Karte, um den Standort des Panoramas zu bestimmen. Damit Sie es leichter haben, ist der Kartenausschnitt auf eine bestimmte Region begrenzt und enth&auml;lt zus&auml;tzlich einen Rahmen. Jeder Panoramastandort liegt innerhalb des Rahmens</p>
           <button id="tutorial-next-2">Weiter</button>
         </div>
         <div id="tutorial-step-3" class="tutorial-popup" style="display: none;">
           <p>Wenn Sie meinen den Standort gefunden zu haben, setzen Sie einen Marker auf der Karte ab, um den Standort zu markieren. Sie k&ouml;nnen beliebig oft klicken. Der
-		  Marker wird dann aktualisiert.
-		  Klicken Sie anschlie&szlig;end auf "Standort einreichen".</p>
+		         Marker wird dann aktualisiert.
+		         Klicken Sie anschlie&szlig;end auf "Standort einreichen".</p>
           <button id="tutorial-next-3">Weiter</button>
         </div>
         <div id="tutorial-step-4" class="tutorial-popup" style="display: none;">
-          <p>Beantworten Sie die nun die Frage. Wenn Sie auf OK klicken, geht der eigentliche Test auch schon los. Wenden Sie die gleichen Schritte auf alle acht folgenden
-		  Panoramen an. Viel Spa&szlig;!</p>
+          <p>Beantworten Sie die nun die Frage. Wenn Sie auf OK klicken, kommen Sie zum n&auml;chsten Panorama.</p>
+        </div>
+        <div id="tutorial-step-5" class="tutorial-popup" style="display: none;">
+          <p>Dies ist ein weiteres Beispielpanorama. Wenden Sie die gelernten Schritte darauf an. Aber beachten Sie, dass mit dem n&auml;chsten Panorama der eigentliche Test
+             beginnt. Viel Spa&szlig;!
+          </p>
+          <button id="tutorial-finish">OK</button>
         </div>
       </div>
     </div>
+
+    <div id="panorama-message" class="hidden" style="display: none">Ab hier beginnt der Test! </div>
 	
     <div id="map" style="display: none;"></div>
 	
@@ -54,8 +61,10 @@
       <div id="google-map"></div>
       <button id="expand-map-button">&#8598;</button> <!-- Arrow icon for expand -->
 	  <button id="submit-button" style="display: none;">Standort einreichen</button> <!-- New submit button -->
-    </div>
+  </div>
 	
+  
+
 	
 	<div id="finished-message" style="display: none;">
       <h1>Fertig! Danke f&uuml;r Ihre Teilname</h1>
