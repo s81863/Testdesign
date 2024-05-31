@@ -29,7 +29,7 @@ function getRandomOffsetY() {
 // Liste der Koordinaten, auf die die Karten zunächst zentriert sein sollen.
 const mapCenterList = [
   { lat: 52.5215231 + getRandomOffsetY(), lng: 13.4106509 + getRandomOffsetX()}, // Berlin ALexanderplatz (tutorial)
-  { lat: 52.5164116 + getRandomOffsetY(), lng: 13.3794872 + getRandomOffsetX()}, // Berlin Brandenburger Tor (tutorial)
+  { lat: 49.9859891 + getRandomOffsetY(), lng: 7.0935337 + getRandomOffsetX()}, // Berlin Brandenburger Tor (tutorial)
   { lat: 50.940571 + getRandomOffsetY(), lng: 6.9624213 + getRandomOffsetX() }, // Köln (Dom)
   { lat: 53.5421631 + getRandomOffsetY(), lng: 9.993536 + getRandomOffsetX() }, // Hamburg
   { lat: 52.0284624 + getRandomOffsetY(), lng: 13.8943828 + getRandomOffsetX() }, // Schlepzig (Brandenburg)
@@ -50,6 +50,16 @@ function getMapBound() {
   }));
 }
 
+function getPolygonFromBound(bound: { north: number, south: number, west: number, east: number }) {
+  return [
+    { lat: bound.north, lng: bound.west }, 
+    { lat: bound.north, lng: bound.east }, 
+    { lat: bound.south, lng: bound.east }, 
+    { lat: bound.south, lng: bound.west }, 
+    { lat: bound.north, lng: bound.west } 
+  ];
+}
+
 
 let userGroup: 'A' | 'B';			// Variable für die Testgruppe 	
 // Konstanten um die Google map auf einen anderen Typ zu stellen
@@ -59,7 +69,7 @@ const hybridMapType = 'hybrid';
 // Liste der Panoramen
 const coordinates = [
   { lat: 52.5215231, lng: 13.4106509}, // Berlin ALexanderplatz (tutorial)
-  { lat: 52.5164116, lng: 13.3794872}, // Berlin Brandenburger Tor (tutorial)
+  { lat: 49.9859891, lng: 7.0935337}, // Kröv Weinberge (tutorial)
   { lat: 50.940571, lng: 6.9624213 }, // Köln (Dom)
   { lat: 53.5421631, lng: 9.993536 }, // Hamburg
   { lat: 52.0284624, lng: 13.8943828 }, // Schlepzig (Brandenburg)
@@ -146,6 +156,19 @@ function initMap() {
     gestureHandling: 'greedy',
     zoomControl: true,
   });
+
+  const mapBounds = getMapBound()[currentIndex];
+  const coords = getPolygonFromBound(mapBounds);
+  const polygon = new google.maps.Polyline({
+    path: coords,
+    geodesic: true,
+    strokeColor: "#FF0000",
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+  });
+
+  polygon.setMap(map);
+
   mapIndex++;
 }
 
@@ -192,8 +215,17 @@ function changeView() {
   currentIndex = (currentIndex + 1) % coordinates.length;
   panorama.setPosition(coordinates[currentIndex]);
   initMap();
-    if (currentIndex == 1) {
-	document.getElementById('tutorial')!.style.display = 'none';
+  if (currentIndex == 1) {
+    document.getElementById('tutorial-step-4')!.style.display = 'none';
+    document.getElementById('tutorial-step-5')!.style.display = 'block';
+  }
+  // Message 4 Sekunden anzeigen, dass der Test beginnt
+  if (currentIndex == 2) {
+    document.getElementById("panorama-message")!.style.display = 'block';
+    setTimeout(function(){
+      document.getElementById("panorama-message")!.style.display = 'none';
+    }, 4000);
+    console.log("Message should appear now")
   }
 
   if (currentMarker) {
@@ -351,8 +383,13 @@ function initTutorial() {
   };
 
   document.getElementById('tutorial-finish')!.onclick = () => {
+    console.log('Finish clicked');
     document.getElementById('tutorial')!.style.display = 'none';
   };
+}
+
+function showPanoramaMessage() {
+  
 }
 
 document.getElementById('start-button')!.onclick = () => {
@@ -361,6 +398,8 @@ document.getElementById('start-button')!.onclick = () => {
   startGame();
   initTutorial();
 };
+
+
 
 
 declare global {
