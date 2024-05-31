@@ -3,60 +3,53 @@ import { saveAs } from 'file-saver';
 let currentIndex = 0;
 let mapIndex;
 
+const offset_min_y = 0.002;
+const offset_max_y = 0.009;
+const offset_min_x = 0.003;
+const offset_max_x = 0.013;
+const bound_range_y = 0.02;
+const bound_range_x = 0.03;
+
+function getRandomOffsetX() {
+  const isNegative = Math.random() < 0.5;
+
+  const randomValue = Math.random()*(offset_max_x - offset_min_x) + offset_min_x;
+
+  return isNegative ? -randomValue : randomValue;
+};
+
+function getRandomOffsetY() {
+  const isNegative = Math.random() < 0.5;
+
+  const randomValue = Math.random()*(offset_max_y - offset_min_y) + offset_min_y;
+
+  return isNegative ? -randomValue : randomValue;
+};
+
 // Liste der Koordinaten, auf die die Karten zunächst zentriert sein sollen.
 const mapCenterList = [
-  {lat: 52.5214119, lng: 13.4071451},	
-  { lat: 50.0968306, lng: 7.1398799 }, // Bereits auf den Standort zentriert
-  { lat: 54.2349728, lng: 9.0930605 }, // Bereits auf den Standort zentriert
-  { lat: 52.5164116, lng: 13.3794872 },
-  { lat: 52.5090565, lng: 13.3766477 },
-  { lat: 52.5054908, lng: 13.3341694 },
-  { lat: 52.5049535, lng: 13.2795553 },
-  { lat: 52.5145766, lng: 13.2368277 },
-  { lat: 52.544155, lng: 13.3534112 }
+  { lat: 52.5215231 + getRandomOffsetY(), lng: 13.4106509 + getRandomOffsetX()}, // Berlin ALexanderplatz (tutorial)
+  { lat: 52.5164116 + getRandomOffsetY(), lng: 13.3794872 + getRandomOffsetX()}, // Berlin Brandenburger Tor (tutorial)
+  { lat: 50.940571 + getRandomOffsetY(), lng: 6.9624213 + getRandomOffsetX() }, // Köln (Dom)
+  { lat: 53.5421631 + getRandomOffsetY(), lng: 9.993536 + getRandomOffsetX() }, // Hamburg
+  { lat: 52.0284624 + getRandomOffsetY(), lng: 13.8943828 + getRandomOffsetX() }, // Schlepzig (Brandenburg)
+  { lat: 54.3167353 + getRandomOffsetY(), lng: 13.0911634 + getRandomOffsetX() }, // Stralsund (Innenstadt)
+  { lat: 51.1301398 + getRandomOffsetY(), lng: 11.4160058 + getRandomOffsetX() }, // Gänsetalbrücke
+  { lat: 50.1018994 + getRandomOffsetY(), lng: 7.139526 + getRandomOffsetX() }, // Zugang Calmont Klettersteig
+  { lat: 52.8258756 + getRandomOffsetY(), lng: 7.6419842 + getRandomOffsetX() }, // Wald-Feld-Grenze
+  { lat: 51.5604541 + getRandomOffsetY(), lng: 14.0600081 + getRandomOffsetX() } // Lausitzer Seenplatte
 ];
 
-// Liste der Kartengrenzen: Definiert die Maximale Ausdehnung der Karte in Nord-,Süd-,West- und Ostrichtung
-const mapBoundList = [
- {north: 52.52474700402667,
- south: 52.5160037125997,
- west: 13.395073993266973,
- east: 13.425542404237454},
- {north: 50.124091880676104,
- south: 50.0743414485289,
- west: 7.076158718181713,
- east: 7.191487769936919},
- {north: 54.25470793542802,
- south: 54.22125044166433,
- west: 9.038729714655673,
- east: 9.124903724902042}
- /*
- {north: xx,
- south: xx,
- west: xx,
- east: xx},
- {north: xx,
- south: xx,
- west: xx,
- east: xx},
- {north: xx,
- south: xx,
- west: xx,
- east: xx},
- {north: xx,
- south: xx,
- west: xx,
- east: xx},
- {north: xx,
- south: xx,
- west: xx,
- east: xx},
- {north: xx,
- south: xx,
- west: xx,
- east: xx}
- */
-]
+
+function getMapBound() {
+  return mapCenterList.map(center => ({
+    north: center.lat + bound_range_y,
+    south: center.lat - bound_range_y,
+    west: center.lng - bound_range_x,
+    east: center.lng + bound_range_x
+  }));
+}
+
 
 let userGroup: 'A' | 'B';			// Variable für die Testgruppe 	
 // Konstanten um die Google map auf einen anderen Typ zu stellen
@@ -64,16 +57,17 @@ const standardMapType = 'roadmap';
 const hybridMapType = 'hybrid';
 
 // Liste der Panoramen
-const panoramaIds = [
-'8Qbx2O5-RZpDBN5ToxMvUQ',	//Tutorial Panorama
-'AF1QipPuRXrm2MDpqaFmG7aN07sS1VlV7IUd2S8oHafA',
-'1mErEioMdEynGwxzmMItsA',
-'AF1QipPVGMqgKoSQ1-ZTQeaKPkFy2Eno4HiIkUacc2mw',
-'QbiSnfO4__Qz66L2mxWPzA',
-'AF1QipPAhReORTm9oICvSeam2p--aGkNcEleeA4H3NE1',
-'I7JWsLigdVOhYffwZFURTw',
-'qXC1-SfnJSygM1g08x2kwQ',
-'oPZVNF3kAUfSG8_3Mg2z9A'
+const coordinates = [
+  { lat: 52.5215231, lng: 13.4106509}, // Berlin ALexanderplatz (tutorial)
+  { lat: 52.5164116, lng: 13.3794872}, // Berlin Brandenburger Tor (tutorial)
+  { lat: 50.940571, lng: 6.9624213 }, // Köln (Dom)
+  { lat: 53.5421631, lng: 9.993536 }, // Hamburg
+  { lat: 52.0284624, lng: 13.8943828 }, // Schlepzig (Brandenburg)
+  { lat: 54.3167353, lng: 13.0911634 }, // Stralsund (Innenstadt)
+  { lat: 51.1301398, lng: 11.4160058 }, // Gänsetalbrücke
+  { lat: 50.1018994, lng: 7.139526 }, // Zugang Calmont Klettersteig
+  { lat: 52.8258756, lng: 7.6419842 }, // Wald-Feld-Grenze
+  { lat: 51.5604541, lng: 14.0600081 } // Lausitzer Seenplatte
 ];
 
 // Diese Konstante wird nur für das Tutorial gebraucht
@@ -90,7 +84,7 @@ function initPano(callback) {
   panorama = new google.maps.StreetViewPanorama(
     document.getElementById("map"),
     {
-      pano: panoramaIds[currentIndex],			// Panorama-ID ist abhängig von currentIndex
+      position: coordinates[currentIndex],			// Panorama-ID ist abhängig von currentIndex
       addressControlOptions: {
         position: google.maps.ControlPosition.BOTTOM_CENTER,
       },
@@ -119,7 +113,7 @@ function initPano(callback) {
   // Debugging
   panorama.addListener('status_changed', () => {
     if (panorama.getStatus() !== 'OK') {
-      console.error(`Failed to load panorama ID: ${panoramaIds[currentIndex]}`);
+      console.error(`Failed to load panorama ID: ${coordinates[currentIndex]}`);
     }
   });
 
@@ -135,7 +129,7 @@ function initMap() {
   map = new google.maps.Map(document.getElementById("google-map"), {
     center: mapCenterList[currentIndex],  				// Punkt auf den die Karte zentriert ist (abhängig von currentIndex)
 	restriction: {
-		latLngBounds: mapBoundList[currentIndex],  		// Kartengrenzen (ebenfalls abhängig von currentIndex)
+		latLngBounds: getMapBound()[currentIndex],  		// Kartengrenzen (ebenfalls abhängig von currentIndex)
 		strictBounds: false,
 	},
     zoom: 15,								// Zoomstufe (ggf. auch je nach Panorama anpassen)
@@ -158,8 +152,8 @@ function initMap() {
 function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
   const timestamp = new Date().toISOString();					// Zeitpunkt des Hinzufügens eines Markers
   const panoIndex = currentIndex + 1;						// Nummer des aktuellen Panoramas (+1 damit Start bei 1)
-  const distance = google.maps.geometry.spherical.computeDistanceBetween(	// Eher entfernen oder anpassen, da map Center nicht den Standort darstellt
-    new google.maps.LatLng(mapCenterList[currentIndex]),
+  const distance = google.maps.geometry.spherical.computeDistanceBetween(	
+    new google.maps.LatLng(coordinates[currentIndex]),
     location
   );
   
@@ -195,8 +189,8 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
 
 // Zum nächsten Panorama wechseln
 function changeView() {
-  currentIndex = (currentIndex + 1) % panoramaIds.length;
-  panorama.setPano(panoramaIds[currentIndex]);
+  currentIndex = (currentIndex + 1) % coordinates.length;
+  panorama.setPosition(coordinates[currentIndex]);
   initMap();
     if (currentIndex == 1) {
 	document.getElementById('tutorial')!.style.display = 'none';
