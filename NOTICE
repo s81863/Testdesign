@@ -1,0 +1,9 @@
+This product includes software developed at [js-samples] (https://github.com/googlemaps/js-samples).
+
+Modifications:
+- Modified by [S. Hoffmann & L. Dedeke] in [May and June 2024]
+- modifications to index.html include adding divs for a google map, start, tutorial and finish messages and a modal window.
+- index.css modifications: added styling for the new html elements
+- index.ts modifications: functionality for the new html elements, sequentially displaying multiple streetview panoramas, initializing a google.maps.Map, saving data as a csv
+- summary: The original software was modified to now act as a test environment for a study to be conducted at Berliner Hochschule für Technik (BHT) in which participants see 8 (+2) streetview images 
+  and have to guess their locations based on visible landmarks and a google map of type roadmap or hybrid. Data on the participants' performance is saved locally to a csv file for further analysis.
