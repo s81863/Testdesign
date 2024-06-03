@@ -29,7 +29,7 @@ function getRandomOffsetY() {
 // Liste der Koordinaten, auf die die Karten zunächst zentriert sein sollen.
 const mapCenterList = [
   { lat: 52.5215231 + getRandomOffsetY(), lng: 13.4106509 + getRandomOffsetX()}, // Berlin ALexanderplatz (tutorial)
-  { lat: 49.9859891 + getRandomOffsetY(), lng: 7.0935337 + getRandomOffsetX()}, // Berlin Brandenburger Tor (tutorial)
+  { lat: 49.9859891 + getRandomOffsetY(), lng: 7.0935337 + getRandomOffsetX()}, // Kröv Weinberge (tutorial)
   { lat: 50.940571 + getRandomOffsetY(), lng: 6.9624213 + getRandomOffsetX() }, // Köln (Dom)
   { lat: 53.5421631 + getRandomOffsetY(), lng: 9.993536 + getRandomOffsetX() }, // Hamburg
   { lat: 52.0284624 + getRandomOffsetY(), lng: 13.8943828 + getRandomOffsetX() }, // Schlepzig (Brandenburg)
