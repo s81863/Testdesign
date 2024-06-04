@@ -15,11 +15,8 @@
   <body>
 	<div id="start-message">
       <h1>Willkommen zu unserer Studie!</h1>
-      <p>Sie werden gleich eine Reihe von Google StreetView Panoramen und eine Karte sehen. 
-	  Ihre Aufgabe besteht darin, den Standort des Panoramas auf der Karte zu ermitteln. Der Kartentyp ist entweder die 
-	  Google Maps Standardkarte oder die Luftbild-Hybrid-Ansicht. Welchen Kartentyp Sie zum jeweiligen Panorama sehen, h&auml;ngt von Ihrer Gruppe ab.
-    Wenn Sie auf Start klicken beginnt der eigentliche Test noch nicht sofort. Zuvor wird Ihnen anhand zweier Beispiele
-	  der Testablauf genauer erl&auml;utert.
+      <p>Im Folgenden f&uuml;hren Sie einen Test durch, bei dem Sie sich mit Hilfe von 360&deg;-Panoramen auf einer Karte orientieren m&uuml;ssen. 
+        Sie beginnen mit einem Tutorial, um sich mit der Umgebung und der Handhabung des Tests vertraut zu machen.
 	  </p>
       <button id="start-button">Start</button>
     </div>
@@ -42,13 +39,13 @@
           <button id="tutorial-next-3">Weiter</button>
         </div>
         <div id="tutorial-step-4" class="tutorial-popup" style="display: none;">
-          <p>Beantworten Sie die nun beide Fragen. Nennen Sie f&uuml;r die 2. Frage bitte in Stichworten die Dinge im 
-            Panorama oder auf der Karte, die Ihnen bei der Standortbestimmung geholfen haben (z.B. Br&uuml;cke, Restaurant, Stra&szlig;enverlauf).
+          <p>Beantworten Sie die nun beide Fragen. Nennen Sie f&uuml;r die 2. Frage bitte stichpunktartig an welchen Elementen Sie sich 
+            vordergr&uuml;ndig orientieren konnten.
             Wenn Sie auf OK klicken, kommen Sie zum n&auml;chsten Panorama.</p>
         </div>
         <div id="tutorial-step-5" class="tutorial-popup" style="display: none;">
           <p>Dies ist ein weiteres Beispielpanorama. Wenden Sie die gelernten Schritte darauf an. Aber beachten Sie, dass mit dem n&auml;chsten Panorama der eigentliche Test
-             beginnt. Viel Spa&szlig;!
+             beginnt. Bitte f&uuml;llen Sie ihn nach Ihrem Ermessen z&uuml;gig und genau aus. Viel Spa&szlig;!
           </p>
           <button id="tutorial-finish">OK</button>
         </div>
@@ -83,7 +80,7 @@
           <input type="checkbox" id="checkbox-no" name="area-knowledge"> Nein
         </label>
         <label>
-          <p>Woran haben Sie den Standort gefunden?</p>
+          <p>Woran haben Sie sich orientiert?</p>
           <input type="text" id="landmark-input" name="landmark">
         </label>
         <button id="modal-ok-button" disabled style="display: none;">OK</button>
