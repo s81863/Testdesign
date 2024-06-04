@@ -1,9 +1,8 @@
-//GRUPPE A
-
 import { saveAs } from 'file-saver';
 
 let currentIndex = 0;
 let mapIndex;
+let userGroup: 'A' | 'B';			// Variable für die Testgruppe 	
 
 const offset_min_y = 0.002;
 const offset_max_y = 0.009;
@@ -11,6 +10,20 @@ const offset_min_x = 0.003;
 const offset_max_x = 0.013;
 const bound_range_y = 0.02;
 const bound_range_x = 0.03;
+
+// Liste der Panoramastandorte inklusive deren Index und Kartentyp für Gruppe A
+const coordinates = [
+  { idx: 1, lat: 52.5215231, lng: 13.4106509, mapType: 'roadmap' }, // Berlin ALexanderplatz (tutorial)
+  { idx: 2, lat: 49.9859891, lng: 7.0935337, mapType: 'hybrid' }, // Kröv Weinberge (tutorial)
+  { idx: 3, lat: 50.940571, lng: 6.9624213, mapType: 'roadmap' }, // Köln (Dom)
+  { idx: 4, lat: 53.5421631, lng: 9.993536, mapType: 'hybrid' }, // Hamburg
+  { idx: 5, lat: 52.0284624, lng: 13.8943828, mapType: 'roadmap' }, // Schlepzig (Brandenburg)
+  { idx: 6, lat: 54.3167353, lng: 13.0911634, mapType: 'hybrid' }, // Stralsund (Innenstadt)
+  { idx: 7, lat: 51.1301398, lng: 11.4160058, mapType: 'roadmap' }, // Gänsetalbrücke
+  { idx: 8, lat: 50.1018994, lng: 7.139526, mapType: 'hybrid' }, // Zugang Calmont Klettersteig
+  { idx: 9, lat: 52.8258756, lng: 7.6419842, mapType: 'roadmap' }, // Wald-Feld-Grenze
+  { idx: 10, lat: 51.5604541, lng: 14.0600081, mapType: 'hybrid' } // Lausitzer Seenplatte
+];
 
 function getRandomOffsetX() {
   const isNegative = Math.random() < 0.5;
@@ -47,20 +60,6 @@ function getPolygonFromBound(bound: { north: number, south: number, west: number
   ];
 }
 
-// Liste der Panoramastandorte inklusive deren Index und Kartentyp für Gruppe A
-const coordinates = [
-  { idx: 1, lat: 52.5215231, lng: 13.4106509, mapType: 'roadmap' }, // Berlin ALexanderplatz (tutorial)
-  { idx: 2, lat: 49.9859891, lng: 7.0935337, mapType: 'hybrid' }, // Kröv Weinberge (tutorial)
-  { idx: 3, lat: 50.940571, lng: 6.9624213, mapType: 'roadmap' }, // Köln (Dom)
-  { idx: 4, lat: 53.5421631, lng: 9.993536, mapType: 'hybrid' }, // Hamburg
-  { idx: 5, lat: 52.0284624, lng: 13.8943828, mapType: 'roadmap' }, // Schlepzig (Brandenburg)
-  { idx: 6, lat: 54.3167353, lng: 13.0911634, mapType: 'hybrid' }, // Stralsund (Innenstadt)
-  { idx: 7, lat: 51.1301398, lng: 11.4160058, mapType: 'roadmap' }, // Gänsetalbrücke
-  { idx: 8, lat: 50.1018994, lng: 7.139526, mapType: 'hybrid' }, // Zugang Calmont Klettersteig
-  { idx: 9, lat: 52.8258756, lng: 7.6419842, mapType: 'roadmap' }, // Wald-Feld-Grenze
-  { idx: 10, lat: 51.5604541, lng: 14.0600081, mapType: 'hybrid' } // Lausitzer Seenplatte
-];
-
 // Funktion um ein Array zufällig durcheinanderzumischen
 function shuffleArray(array: any[]) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -73,7 +72,7 @@ function shuffleArray(array: any[]) {
 const firstTwo = coordinates.slice(0, 2);   // Beispielpanoramen exkludieren
 const lastEight = coordinates.slice(2);     // 8 Testpanoramen
 shuffleArray(lastEight);                    // Zufällig durchmischen
-const coordinates2 = firstTwo.concat(lastEight);  // Alle Panoramen wieder zusammenfügen.
+let coordinates2 = firstTwo.concat(lastEight);  // Alle Panoramen wieder zusammenfügen.
 
 // Kartenzentrum basierend auf den Koordinaten der Panoramen und einem Zufalssoffset bestimmen. 
 const mapCenterList = coordinates2.map(coord => ({
@@ -81,6 +80,19 @@ const mapCenterList = coordinates2.map(coord => ({
   lng: coord.lng + getRandomOffsetX()
 }));
 
+// Funktion zum Umkehren des `mapType`
+function reverseMapType(mapType: string): string {
+  return mapType === 'roadmap' ? 'hybrid' : 'roadmap';
+}
+
+// Zufällige Einteilung in Gruppe A oder B
+userGroup = Math.random() < 0.5 ? 'A' : 'B';
+
+// Array für die Proband:in basierend auf der Gruppe
+coordinates2 = userGroup === 'A' ? coordinates2 : coordinates2.map(coord => ({
+  ...coord,
+  mapType: reverseMapType(coord.mapType)
+}));
 
 let panorama: google.maps.StreetViewPanorama;
 let map: google.maps.Map;
@@ -274,7 +286,6 @@ function toggleMapSize() {
 
 // Wird ausgeführt, sobald der User auf Start geklickt hat
 function startGame() {
-  //userGroup = Math.random() < 0.5 ? 'A' : 'B';
   document.getElementById("start-message").style.display = "none";
   document.getElementById("map").style.display = "block";
   //document.getElementById("map-container").style.display = "block";
@@ -351,7 +362,7 @@ function hideModal() {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const now = new Date();
     const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-    const fileName = `data_A_${formattedDate}.csv`;
+    const fileName = `data_${userGroup}_${formattedDate}.csv`;
     saveAs(blob, fileName);
 
     document.getElementById("finished-message").style.display = "block";
