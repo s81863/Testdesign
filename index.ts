@@ -1,3 +1,5 @@
+//GRUPPE A
+
 import { saveAs } from 'file-saver';
 
 let currentIndex = 0;
@@ -26,21 +28,6 @@ function getRandomOffsetY() {
   return isNegative ? -randomValue : randomValue;
 };
 
-// Liste der Koordinaten, auf die die Karten zunächst zentriert sein sollen.
-const mapCenterList = [
-  { lat: 52.5215231 + getRandomOffsetY(), lng: 13.4106509 + getRandomOffsetX()}, // Berlin ALexanderplatz (tutorial)
-  { lat: 49.9859891 + getRandomOffsetY(), lng: 7.0935337 + getRandomOffsetX()}, // Kröv Weinberge (tutorial)
-  { lat: 50.940571 + getRandomOffsetY(), lng: 6.9624213 + getRandomOffsetX() }, // Köln (Dom)
-  { lat: 53.5421631 + getRandomOffsetY(), lng: 9.993536 + getRandomOffsetX() }, // Hamburg
-  { lat: 52.0284624 + getRandomOffsetY(), lng: 13.8943828 + getRandomOffsetX() }, // Schlepzig (Brandenburg)
-  { lat: 54.3167353 + getRandomOffsetY(), lng: 13.0911634 + getRandomOffsetX() }, // Stralsund (Innenstadt)
-  { lat: 51.1301398 + getRandomOffsetY(), lng: 11.4160058 + getRandomOffsetX() }, // Gänsetalbrücke
-  { lat: 50.1018994 + getRandomOffsetY(), lng: 7.139526 + getRandomOffsetX() }, // Zugang Calmont Klettersteig
-  { lat: 52.8258756 + getRandomOffsetY(), lng: 7.6419842 + getRandomOffsetX() }, // Wald-Feld-Grenze
-  { lat: 51.5604541 + getRandomOffsetY(), lng: 14.0600081 + getRandomOffsetX() } // Lausitzer Seenplatte
-];
-
-
 function getMapBound() {
   return mapCenterList.map(center => ({
     north: center.lat + bound_range_y,
@@ -60,41 +47,55 @@ function getPolygonFromBound(bound: { north: number, south: number, west: number
   ];
 }
 
-
-let userGroup: 'A' | 'B';			// Variable für die Testgruppe 	
-// Konstanten um die Google map auf einen anderen Typ zu stellen
-const standardMapType = 'roadmap';              
-const hybridMapType = 'hybrid';
-
-// Liste der Panoramen
+// Liste der Panoramastandorte inklusive deren Index und Kartentyp für Gruppe A
 const coordinates = [
-  { lat: 52.5215231, lng: 13.4106509}, // Berlin ALexanderplatz (tutorial)
-  { lat: 49.9859891, lng: 7.0935337}, // Kröv Weinberge (tutorial)
-  { lat: 50.940571, lng: 6.9624213 }, // Köln (Dom)
-  { lat: 53.5421631, lng: 9.993536 }, // Hamburg
-  { lat: 52.0284624, lng: 13.8943828 }, // Schlepzig (Brandenburg)
-  { lat: 54.3167353, lng: 13.0911634 }, // Stralsund (Innenstadt)
-  { lat: 51.1301398, lng: 11.4160058 }, // Gänsetalbrücke
-  { lat: 50.1018994, lng: 7.139526 }, // Zugang Calmont Klettersteig
-  { lat: 52.8258756, lng: 7.6419842 }, // Wald-Feld-Grenze
-  { lat: 51.5604541, lng: 14.0600081 } // Lausitzer Seenplatte
+  { idx: 1, lat: 52.5215231, lng: 13.4106509, mapType: 'roadmap' }, // Berlin ALexanderplatz (tutorial)
+  { idx: 2, lat: 49.9859891, lng: 7.0935337, mapType: 'hybrid' }, // Kröv Weinberge (tutorial)
+  { idx: 3, lat: 50.940571, lng: 6.9624213, mapType: 'roadmap' }, // Köln (Dom)
+  { idx: 4, lat: 53.5421631, lng: 9.993536, mapType: 'hybrid' }, // Hamburg
+  { idx: 5, lat: 52.0284624, lng: 13.8943828, mapType: 'roadmap' }, // Schlepzig (Brandenburg)
+  { idx: 6, lat: 54.3167353, lng: 13.0911634, mapType: 'hybrid' }, // Stralsund (Innenstadt)
+  { idx: 7, lat: 51.1301398, lng: 11.4160058, mapType: 'roadmap' }, // Gänsetalbrücke
+  { idx: 8, lat: 50.1018994, lng: 7.139526, mapType: 'hybrid' }, // Zugang Calmont Klettersteig
+  { idx: 9, lat: 52.8258756, lng: 7.6419842, mapType: 'roadmap' }, // Wald-Feld-Grenze
+  { idx: 10, lat: 51.5604541, lng: 14.0600081, mapType: 'hybrid' } // Lausitzer Seenplatte
 ];
 
-// Diese Konstante wird nur für das Tutorial gebraucht
-const fixedMapCenter = { lat: 52.5194748, lng: 13.3842489 };
+// Funktion um ein Array zufällig durcheinanderzumischen
+function shuffleArray(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+const firstTwo = coordinates.slice(0, 2);   // Beispielpanoramen exkludieren
+const lastEight = coordinates.slice(2);     // 8 Testpanoramen
+shuffleArray(lastEight);                    // Zufällig durchmischen
+const coordinates2 = firstTwo.concat(lastEight);  // Alle Panoramen wieder zusammenfügen.
+
+// Kartenzentrum basierend auf den Koordinaten der Panoramen und einem Zufalssoffset bestimmen. 
+const mapCenterList = coordinates2.map(coord => ({
+  lat: coord.lat + getRandomOffsetY(),
+  lng: coord.lng + getRandomOffsetX()
+}));
+
 
 let panorama: google.maps.StreetViewPanorama;
 let map: google.maps.Map;
 let currentMarker: google.maps.Marker | null = null;
-let markersData: string[] = ['ts_pano_loaded,ts_marker_set,index,lat,lng,distance,areaknowledge'];
+let markersData: string[] = ['ts_pano_loaded,ts_marker_set,index,lat,lng,distance,areaknowledge,landmark'];
 let tsPanoLoaded: string;
 
 //Initializieren des Panoramas
 function initPano(callback) {
+  const { lat, lng } = coordinates2[currentIndex];
+  
   panorama = new google.maps.StreetViewPanorama(
     document.getElementById("map"),
     {
-      position: coordinates[currentIndex],			// Panorama-ID ist abhängig von currentIndex
+      position: { lat, lng },			// Panorama-ID ist abhängig von currentIndex
       addressControlOptions: {
         position: google.maps.ControlPosition.BOTTOM_CENTER,
       },
@@ -123,7 +124,7 @@ function initPano(callback) {
   // Debugging
   panorama.addListener('status_changed', () => {
     if (panorama.getStatus() !== 'OK') {
-      console.error(`Failed to load panorama ID: ${coordinates[currentIndex]}`);
+      console.error(`Failed to load panorama ID: ${coordinates2[currentIndex]}`);
     }
   });
 
@@ -134,8 +135,13 @@ function initPano(callback) {
 // Karte initialisieren
 function initMap() {
   // Kartentyp ist abhängig von der Gruppe und dem momentanen Map Index
-  const mapType = (userGroup === 'A' && mapIndex % 2 === 0) || (userGroup === 'B' && mapIndex % 2 !== 0) ? standardMapType : hybridMapType;    
-  console.log(userGroup, mapIndex ); 
+  let mapType;
+  if (currentIndex <=1 ) {
+    ({ mapType } = firstTwo[currentIndex]);
+  }
+  else {
+    ({ mapType } = coordinates2[currentIndex]);
+  } 
   map = new google.maps.Map(document.getElementById("google-map"), {
     center: mapCenterList[currentIndex],  				// Punkt auf den die Karte zentriert ist (abhängig von currentIndex)
 	restriction: {
@@ -174,9 +180,9 @@ function initMap() {
 
 function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
   const timestamp = new Date().toISOString();					// Zeitpunkt des Hinzufügens eines Markers
-  const panoIndex = currentIndex + 1;						// Nummer des aktuellen Panoramas (+1 damit Start bei 1)
+  const { idx } = coordinates2[currentIndex];						// Nummer des aktuellen Panoramas (+1 damit Start bei 1)
   const distance = google.maps.geometry.spherical.computeDistanceBetween(	
-    new google.maps.LatLng(coordinates[currentIndex]),
+    new google.maps.LatLng(coordinates2[currentIndex]),
     location
   );
   
@@ -188,18 +194,18 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
   currentMarker = new google.maps.Marker({
     position: location,
     map: map,
-    title: `Index: ${panoIndex}, Time: ${timestamp}`
+    title: `Index: ${idx}, Time: ${timestamp}`
   });
 
-  console.log(`Marker added at index ${panoIndex} with timestamp ${timestamp}`);
+  console.log(`Marker added at index ${idx} with timestamp ${timestamp}`);
   console.log(`Distance from panorama view: ${distance} meters`);
 
   // Daten für die Csv-Datei	
-  const markerData = `${tsPanoLoaded},${timestamp},${panoIndex},${location.lat()},${location.lng()},${distance},`; 
+  const markerData = `${tsPanoLoaded},${timestamp},${idx},${location.lat()},${location.lng()},${distance},`; 
 
   // Beispielpanorama exkludieren	
   if (currentIndex !== 0) {
-    const existingMarkerIndex = markersData.findIndex(data => data.split(",")[2] === panoIndex.toString());
+    const existingMarkerIndex = markersData.findIndex(data => data.split(",")[2] === idx.toString());
 
     if (existingMarkerIndex !== -1) {
       markersData[existingMarkerIndex] = markerData;
@@ -212,8 +218,8 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
 
 // Zum nächsten Panorama wechseln
 function changeView() {
-  currentIndex = (currentIndex + 1) % coordinates.length;
-  panorama.setPosition(coordinates[currentIndex]);
+  currentIndex = (currentIndex + 1) % coordinates2.length;
+  panorama.setPosition(coordinates2[currentIndex]);
   initMap();
   if (currentIndex == 1) {
     document.getElementById('tutorial-step-4')!.style.display = 'none';
@@ -232,7 +238,7 @@ function changeView() {
     currentMarker.setMap(null);
     currentMarker = null;
   }
-
+  console.log(coordinates2);
 }
 
 function submitMarker() {
@@ -268,17 +274,19 @@ function toggleMapSize() {
 
 // Wird ausgeführt, sobald der User auf Start geklickt hat
 function startGame() {
-  userGroup = Math.random() < 0.5 ? 'A' : 'B';
+  //userGroup = Math.random() < 0.5 ? 'A' : 'B';
   document.getElementById("start-message").style.display = "none";
   document.getElementById("map").style.display = "block";
   //document.getElementById("map-container").style.display = "block";
   //document.getElementById("next-button").style.display = "block";
+
   
   initPano(() => {
     // Callback to initMap after mapIndex is set
     initMap();
   });
 }
+
 
 // Fenster für Frage nach Ortskenntnissen zeigen
 function showModal() {
@@ -315,7 +323,9 @@ function handleCheckboxChange(changedCheckbox: HTMLInputElement, otherCheckbox: 
 function hideModal() {
   const yesCheckbox = document.getElementById("checkbox-yes") as HTMLInputElement;
   const noCheckbox = document.getElementById("checkbox-no") as HTMLInputElement;
-  // Es muss eine Antwort ausgewählt sein
+  const landmarkInput = document.getElementById("landmark-input") as HTMLInputElement;
+  
+  // Ensure a selection is made
   if (!yesCheckbox.checked && !noCheckbox.checked) {
     alert("Please select an option before proceeding.");
     return;
@@ -325,31 +335,34 @@ function hideModal() {
   modal.style.display = "none";
 
   const areaKnowledge = yesCheckbox.checked ? 'yes' : 'no';
+  const landmark = landmarkInput.value.trim();
 
   if (currentIndex !== 0) {
-    markersData[markersData.length - 1] += areaKnowledge;
+    markersData[markersData.length - 1] += `${areaKnowledge},${landmark}`;
   }
 
   yesCheckbox.checked = false;
   noCheckbox.checked = false;
-  // Wenn das letzte Panorama bearbeitet wurde
+  landmarkInput.value = '';
+
+  // If last panorama processed
   if (currentIndex === mapCenterList.length - 1) {
     const csvContent = markersData.join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const now = new Date();
     const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-    const fileName = `data_${userGroup}_${formattedDate}.csv`;
+    const fileName = `data_A_${formattedDate}.csv`;
     saveAs(blob, fileName);
 
     document.getElementById("finished-message").style.display = "block";
     document.getElementById("map").style.display = "none";
     document.getElementById("map-container").style.display = "none";
-    //document.getElementById("next-button").style.display = "none";
     document.getElementById("submit-button").style.display = "none";
   } else {
-    changeView();  							// Ansonsten zum nächsten Panorama gehen
+    changeView();
   }
 }
+
 
 
 function showTutorialStep(step: number) {
