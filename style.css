@@ -26,13 +26,13 @@ body {
 #submit-button {
   opacity: 0.75;	
   position: absolute;
-  bottom: 10%;
+  bottom: 8%;
   right: 50%;
   transform: translate(50%, 50%);
   background-color: #4CAF50; /* Green background */
   color: white; /* White text */
   border: none; /* Remove borders */
-  padding: 10px 28px; /* Padding */
+  padding: 10px 18px; /* Padding */
   text-align: center; /* Center text */
   text-decoration: none; /* Remove underline */
   display: inline-block; /* Inline-block */
@@ -76,8 +76,8 @@ body {
 
 #expand-map-button {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  top: 0px;
+  left: 0px;
   background-color: #fff;
   border: none;
   padding: 5px;
@@ -115,18 +115,13 @@ body {
   cursor: pointer;
 }
 
+/* Adjusted styles */
 .modal {
   position: fixed;
-  z-index: 30;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  background-color: white;
-  border: 2px solid #ddd;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  text-align: center;
+  width: 50%
+  z-index: 10;
+  left: 0%;
+  top: 0%; 
 }
 
 .modal-content {
@@ -139,9 +134,7 @@ body {
   margin-bottom: 20px;
 }
 
-.modal-content label {
-  margin: 10px 0;
-}
+
 
 #modal-ok-button {
   margin-top: 20px;
@@ -150,19 +143,14 @@ body {
 }
 
 #modal-exit-button {
-  position: fixed;
-  top: 0px;
-  right: 0%;
-  background: none;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
+  position: absolute;
+      top: 0px;
+      right: 0px;
 }
 
 #modal-exit-button:hover {
   color: red;
 }
-
 
 .tutorial-popup {
   position: absolute;
@@ -175,7 +163,7 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   z-index: 30;
   text-align: left;
-  max-width: 300px; 
+  max-width: 400px; 
   width: auto;
   overflow-wrap: break-word;
 }
@@ -213,4 +201,15 @@ body {
   padding: 20px;
   border: 2px solid #ddd;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Centering the form */
+#end-form {
+  position: absolute;
+  top: 5%;
+  left: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
