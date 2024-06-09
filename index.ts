@@ -4,6 +4,9 @@ let currentIndex = 0;
 let mapIndex;
 let userGroup: 'A' | 'B';			// Variable für die Testgruppe 	
 
+const now = new Date();
+const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+
 const offset_min_y = 0.002;
 const offset_max_y = 0.009;
 const offset_min_x = 0.003;
@@ -211,6 +214,7 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
 
   console.log(`Marker added at index ${idx} with timestamp ${timestamp}`);
   console.log(`Distance from panorama view: ${distance} meters`);
+  console.log(userGroup);
 
   // Daten für die Csv-Datei	
   const markerData = `${tsPanoLoaded},${timestamp},${idx},${location.lat()},${location.lng()},${distance},`; 
@@ -288,6 +292,7 @@ function toggleMapSize() {
 function startGame() {
   document.getElementById("start-message").style.display = "none";
   document.getElementById("map").style.display = "block";
+  //document.getElementById("end-form").style.display = "block";
   //document.getElementById("map-container").style.display = "block";
   //document.getElementById("next-button").style.display = "block";
 
@@ -360,12 +365,10 @@ function hideModal() {
   if (currentIndex === mapCenterList.length - 1) {
     const csvContent = markersData.join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const now = new Date();
-    const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
     const fileName = `data_${userGroup}_${formattedDate}.csv`;
     saveAs(blob, fileName);
 
-    document.getElementById("finished-message").style.display = "block";
+    document.getElementById("end-form").style.display = "block";
     document.getElementById("map").style.display = "none";
     document.getElementById("map-container").style.display = "none";
     document.getElementById("submit-button").style.display = "none";
@@ -373,7 +376,6 @@ function hideModal() {
     changeView();
   }
 }
-
 
 
 function showTutorialStep(step: number) {
@@ -412,9 +414,6 @@ function initTutorial() {
   };
 }
 
-function showPanoramaMessage() {
-  
-}
 
 document.getElementById('start-button')!.onclick = () => {
   document.getElementById('start-message')!.style.display = 'none';
@@ -422,6 +421,66 @@ document.getElementById('start-button')!.onclick = () => {
   startGame();
   initTutorial();
 };
+
+
+// Wait for the DOM to be fully loaded before adding event listeners
+document.addEventListener("DOMContentLoaded", () => {
+  // Get the button element
+  const finishButton = document.getElementById("bt-finish");
+  if (!finishButton) {
+      console.error("Finish button not found");
+      return;
+  }
+
+  // Add click event listener to the button
+  finishButton.addEventListener("click", (event: Event) => {
+      event.preventDefault(); // Prevent default form submission
+
+      // Get the form element
+      const form = document.getElementById("survey-form") as HTMLFormElement;
+      if (!form) {
+          console.error("Form not found");
+          return;
+      }
+
+      // Get the form data
+      const formData = new FormData(form);
+
+      // Convert form data to an object
+      const data: { [key: string]: string | string[] } = {};
+      formData.forEach((value, key) => {
+          if (data[key]) {
+              if (Array.isArray(data[key])) {
+                  (data[key] as string[]).push(value as string);
+              } else {
+                  data[key] = [data[key] as string, value as string];
+              }
+          } else {
+              data[key] = value as string;
+          }
+      });
+
+      // Convert the data object to a JSON string
+      const jsonData = JSON.stringify(data, null, 2);
+
+      const blob = new Blob([jsonData], { type: 'application/json' });
+
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `form-data_${userGroup}_${formattedDate}.json`;
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+
+      document.getElementById("end-form")!.style.display = 'none';
+      document.getElementById("finished-message")!.style.display = 'block';
+
+      console.log("Form data saved to form-data.json");
+  });
+});
 
 
 
