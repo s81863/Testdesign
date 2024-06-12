@@ -1,4 +1,6 @@
 import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
+
 
 let currentIndex = 0;
 let mapIndex;
@@ -8,9 +10,9 @@ const now = new Date();
 const formattedDate = `${now.getMonth() + 1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
 
 const offset_min_y = 0.002;
-const offset_max_y = 0.009;
+const offset_max_y = 0.011;
 const offset_min_x = 0.003;
-const offset_max_x = 0.013;
+const offset_max_x = 0.015;
 const bound_range_y = 0.02;
 const bound_range_x = 0.03;
 
@@ -102,6 +104,7 @@ let map: google.maps.Map;
 let currentMarker: google.maps.Marker | null = null;
 let markersData: string[] = ['ts_pano_loaded,ts_marker_set,index,lat,lng,distance,areaknowledge,landmark'];
 let tsPanoLoaded: string;
+let currentPanorama: google.maps.StreetViewPanorama | null = null;
 
 //Initializieren des Panoramas
 function initPano(callback) {
@@ -240,6 +243,7 @@ function changeView() {
   if (currentIndex == 1) {
     document.getElementById('tutorial-step-4')!.style.display = 'none';
     document.getElementById('tutorial-step-5')!.style.display = 'block';
+    document.getElementById('reload-panorama')!.style.display = 'block';
   }
   // Message 4 Sekunden anzeigen, dass der Test beginnt
   if (currentIndex == 2) {
@@ -254,7 +258,14 @@ function changeView() {
     currentMarker.setMap(null);
     currentMarker = null;
   }
-  console.log(coordinates2);
+  
+  document.getElementById("reload-panorama")!.addEventListener("click", () => {
+    initPano(() => {
+      // Callback to initMap after mapIndex is set
+      initMap();
+    });
+  });
+
 }
 
 function submitMarker() {
@@ -361,21 +372,18 @@ function hideModal() {
   noCheckbox.checked = false;
   landmarkInput.value = '';
 
-  // If last panorama processed
+  // If last panorama processed, show the form
   if (currentIndex === mapCenterList.length - 1) {
-    const csvContent = markersData.join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const fileName = `data_${userGroup}_${formattedDate}.csv`;
-    saveAs(blob, fileName);
-
-    document.getElementById("end-form").style.display = "block";
-    document.getElementById("map").style.display = "none";
-    document.getElementById("map-container").style.display = "none";
-    document.getElementById("submit-button").style.display = "none";
+    document.getElementById("end-form")!.style.display = "block";
+    document.getElementById("map")!.style.display = "none";
+    document.getElementById("map-container")!.style.display = "none";
+    document.getElementById("submit-button")!.style.display = "none";
+    document.getElementById("reload-panorama")!.style.display = "none";
   } else {
     changeView();
   }
 }
+
 
 
 function showTutorialStep(step: number) {
@@ -425,62 +433,51 @@ document.getElementById('start-button')!.onclick = () => {
 
 // Wait for the DOM to be fully loaded before adding event listeners
 document.addEventListener("DOMContentLoaded", () => {
-  // Get the button element
   const finishButton = document.getElementById("bt-finish");
   if (!finishButton) {
-      console.error("Finish button not found");
-      return;
+    console.error("Finish button not found");
+    return;
   }
 
-  // Add click event listener to the button
   finishButton.addEventListener("click", (event: Event) => {
-      event.preventDefault(); // Prevent default form submission
+    event.preventDefault(); // Prevent default form submission
 
-      // Get the form element
-      const form = document.getElementById("survey-form") as HTMLFormElement;
-      if (!form) {
-          console.error("Form not found");
-          return;
+    // Collect form data
+    const form = document.getElementById("survey-form") as HTMLFormElement;
+    const formData = new FormData(form);
+    const data: { [key: string]: string | string[] } = {};
+    formData.forEach((value, key) => {
+      if (data[key]) {
+        if (Array.isArray(data[key])) {
+          (data[key] as string[]).push(value as string);
+        } else {
+          data[key] = [data[key] as string, value as string];
+        }
+      } else {
+        data[key] = value as string;
       }
+    });
+    const jsonData = JSON.stringify(data, null, 2);
+    const jsonBlob = new Blob([jsonData], { type: 'application/json' });
 
-      // Get the form data
-      const formData = new FormData(form);
+    const csvContent = markersData.join("\n");
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 
-      // Convert form data to an object
-      const data: { [key: string]: string | string[] } = {};
-      formData.forEach((value, key) => {
-          if (data[key]) {
-              if (Array.isArray(data[key])) {
-                  (data[key] as string[]).push(value as string);
-              } else {
-                  data[key] = [data[key] as string, value as string];
-              }
-          } else {
-              data[key] = value as string;
-          }
-      });
+    // Create zip file
+    const zip = new JSZip();
+    zip.file(`data_${userGroup}_${formattedDate}.csv`, csvBlob);
+    zip.file(`form-data_${userGroup}_${formattedDate}.json`, jsonBlob);
+    
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, `data_${userGroup}_${formattedDate}.zip`);
+    });
 
-      // Convert the data object to a JSON string
-      const jsonData = JSON.stringify(data, null, 2);
-
-      const blob = new Blob([jsonData], { type: 'application/json' });
-
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `form-data_${userGroup}_${formattedDate}.json`;
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      document.body.removeChild(link);
-
-      document.getElementById("end-form")!.style.display = 'none';
-      document.getElementById("finished-message")!.style.display = 'block';
-
-      console.log("Form data saved to form-data.json");
+    // Show finished message
+    document.getElementById("end-form")!.style.display = 'none';
+    document.getElementById("finished-message")!.style.display = 'block';
   });
 });
+
 
 
 
