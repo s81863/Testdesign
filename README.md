@@ -11,9 +11,10 @@ When both of these are installed you can open up either Git Bash or Windows Powe
 ```sh
 git clone https://github.com/s81863/Testdesign.git
 ```
-You'll also need to install [file-saver](https://www.npmjs.com/package/file-saver). Use Powershell for that.
+You'll also need to install [file-saver](https://www.npmjs.com/package/file-saver) and [jszip](https://www.npmjs.com/package/jszip).
 ```sh
 npm install file-saver
+npm install jszip
 ```
 Then open up Powershell once more and move into the directory you just cloned. Typically it is saved to C:\Users\User\Testdesign
 
