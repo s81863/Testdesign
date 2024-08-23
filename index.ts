@@ -1,7 +1,3 @@
-import { saveAs } from 'file-saver';
-import JSZip from 'jszip';
-
-
 let currentIndex = 0;
 let mapIndex;
 let userGroup: 'A' | 'B';			// Variable für die Testgruppe 	
@@ -13,8 +9,10 @@ const offset_min_y = 0.002;
 const offset_max_y = 0.011;
 const offset_min_x = 0.003;
 const offset_max_x = 0.015;
-const bound_range_y = 0.02;
-const bound_range_x = 0.03;
+const draw_range_y = 0.02;
+const draw_range_x = 0.03;
+const bound_range_y = 0.04;
+const bound_range_x = 0.05;
 
 // Liste der Panoramastandorte inklusive deren Index und Kartentyp für Gruppe A
 const coordinates = [
@@ -55,7 +53,16 @@ function getMapBound() {
   }));
 }
 
-function getPolygonFromBound(bound: { north: number, south: number, west: number, east: number }) {
+function getMapDraw() {
+  return mapCenterList.map(center => ({
+    north: center.lat + draw_range_y,
+    south: center.lat - draw_range_y,
+    west: center.lng - draw_range_x,
+    east: center.lng + draw_range_x
+  }));
+}
+
+function getPolygonFromDraw(bound: { north: number, south: number, west: number, east: number }) {
   return [
     { lat: bound.north, lng: bound.west }, 
     { lat: bound.north, lng: bound.east }, 
@@ -102,9 +109,49 @@ coordinates2 = userGroup === 'A' ? coordinates2 : coordinates2.map(coord => ({
 let panorama: google.maps.StreetViewPanorama;
 let map: google.maps.Map;
 let currentMarker: google.maps.Marker | null = null;
-let markersData: string[] = ['ts_pano_loaded,ts_marker_set,index,lat,lng,distance,areaknowledge,landmark'];
+// let markersData: string[] = ['ts_pano_loaded,ts_marker_set,index,lat,lng,distance,areaknowledge,landmark'];
 let tsPanoLoaded: string;
 let currentPanorama: google.maps.StreetViewPanorama | null = null;
+
+// Interface for MarkerData
+interface MarkerData {
+  ts_pano_loaded: string;
+  ts_marker_set: string;
+  index: number;
+  lat: number;
+  lng: number;
+  distance: number;
+  areaknowledge: string;
+  landmark: string;
+};
+
+let markersData: MarkerData[] = [];
+
+function addMarkerData(tsPanoLoaded: string, timestamp: string, idx: number, lat: number, lng: number, distance: number, areaKnowledge: string, landmark: string) {
+  const markerData: MarkerData = {
+    ts_pano_loaded: tsPanoLoaded,
+    ts_marker_set: timestamp,
+    index: idx,
+    lat: lat,
+    lng: lng,
+    distance: distance,
+    areaknowledge: areaKnowledge,
+    landmark: landmark
+  };
+
+  markersData.push(markerData);
+};
+
+function updateMarkerData(indexToUpdate: number, updatedAreaKnowledge: string, updatedLandmark: string) {
+  const markerToUpdate = markersData.find(marker => marker.index === indexToUpdate);
+
+  if (markerToUpdate) {
+    markerToUpdate.areaknowledge = updatedAreaKnowledge;
+    markerToUpdate.landmark = updatedLandmark;
+  } else {
+    console.error(`Marker with index ${indexToUpdate} not found.`);
+  }
+};
 
 //Initializieren des Panoramas
 function initPano(callback) {
@@ -136,15 +183,15 @@ function initPano(callback) {
   // Aktualisieren, wenn zum nächsten Panorama gewechselt wird
   panorama.addListener('pano_changed', () => {
     tsPanoLoaded = new Date().toISOString();
-    console.log(`Current Panorama ID: ${panorama.getPano()}`);
-    console.log(`Timestamp Panorama Loaded: ${tsPanoLoaded}`);
+    //console.log(`Current Panorama ID: ${panorama.getPano()}`);
+    //console.log(`Timestamp Panorama Loaded: ${tsPanoLoaded}`);
   });
-  // Debugging
+  /**  Debugging
   panorama.addListener('status_changed', () => {
     if (panorama.getStatus() !== 'OK') {
       console.error(`Failed to load panorama ID: ${coordinates2[currentIndex]}`);
     }
-  });
+  });*/
 
   mapIndex = 0;
   callback();
@@ -181,8 +228,8 @@ function initMap() {
     zoomControl: true,
   });
 
-  const mapBounds = getMapBound()[currentIndex];
-  const coords = getPolygonFromBound(mapBounds);
+  const mapDraw = getMapDraw()[currentIndex];
+  const coords = getPolygonFromDraw(mapDraw);
   const polygon = new google.maps.Polyline({
     path: coords,
     geodesic: true,
@@ -215,22 +262,26 @@ function addMarker(location: google.maps.LatLng | google.maps.LatLngLiteral) {
     title: `Index: ${idx}, Time: ${timestamp}`
   });
 
-  console.log(`Marker added at index ${idx} with timestamp ${timestamp}`);
-  console.log(`Distance from panorama view: ${distance} meters`);
-  console.log(userGroup);
+  //console.log(`Marker added at index ${idx} with timestamp ${timestamp}`);
+  //console.log(`Distance from panorama view: ${distance} meters`);
+  //console.log(userGroup);
 
   // Daten für die Csv-Datei	
-  const markerData = `${tsPanoLoaded},${timestamp},${idx},${location.lat()},${location.lng()},${distance},`; 
+  // const markerData = `${tsPanoLoaded},${timestamp},${idx},${location.lat()},${location.lng()},${distance},`; 
 
   // Beispielpanorama exkludieren	
-  if (currentIndex !== 0) {
+  if (currentIndex >= 2) {
+    
+    addMarkerData(tsPanoLoaded, timestamp, idx, location.lat(), location.lng(), distance, " ", " ");
+    
+    /**
     const existingMarkerIndex = markersData.findIndex(data => data.split(",")[2] === idx.toString());
 
     if (existingMarkerIndex !== -1) {
       markersData[existingMarkerIndex] = markerData;
     } else {
       markersData.push(markerData);
-    }
+    } */
   }
   
 }
@@ -274,11 +325,8 @@ function submitMarker() {
     return;
   }
 
-  if (markersData.length > 1 || currentIndex === 0) {
-    showModal();
-  } else {
-    console.log('No markers to submit.');
-  }
+  showModal();
+  
 }
 
 
@@ -363,9 +411,10 @@ function hideModal() {
 
   const areaKnowledge = yesCheckbox.checked ? 'yes' : 'no';
   const landmark = landmarkInput.value.trim();
+  let currentIdxValue = coordinates2[currentIndex].idx;
 
-  if (currentIndex !== 0) {
-    markersData[markersData.length - 1] += `${areaKnowledge},${landmark}`;
+  if (currentIndex >= 2) {
+    updateMarkerData(currentIdxValue, areaKnowledge, landmark);
   }
 
   yesCheckbox.checked = false;
@@ -374,11 +423,79 @@ function hideModal() {
 
   // If last panorama processed, show the form
   if (currentIndex === mapCenterList.length - 1) {
-    document.getElementById("end-form")!.style.display = "block";
     document.getElementById("map")!.style.display = "none";
     document.getElementById("map-container")!.style.display = "none";
     document.getElementById("submit-button")!.style.display = "none";
     document.getElementById("reload-panorama")!.style.display = "none";
+    
+    // Function to get value if element exists
+    const getValue = (selector: string) => {
+      const element = document.querySelector(selector) as HTMLInputElement;
+      return element ? element.value : null;
+    };
+
+    // Function to get values of checked checkboxes
+    const getCheckedValues = (selector: string) => {
+      const elements = Array.from(document.querySelectorAll(selector)) as HTMLInputElement[];
+      return elements.map(el => el.value);
+    };
+
+    // Collect form data
+    const test_key = getValue('#key-input');
+    const age = getValue('#age-input');
+    const gender = getValue('input[name="select-gender"]:checked');
+    const states = getCheckedValues('input[name="checkboxes-state"]:checked');
+    const urbanRural = getValue('input[name="question-urban-rural"]:checked');
+    const geoStudy = getValue('input[name="question-study-progamme"]:checked');
+    const studyDegree = getValue('input[name="question-study-degree"]:checked');
+    const gmapsFrequency = getValue('input[name="question-gmaps1"]:checked');
+    const mapType = getValue('input[name="question-gmaps2"]:checked');
+    const otherMaps = getValue('input[name="question-other-maps"]:checked');
+    const geoGuessr = getValue('input[name="question-geoguessr"]:checked');
+
+    const data = {
+      userGroup,
+      test_key,
+      age,
+      gender,
+      states,
+      urbanRural,
+      geoStudy,
+      studyDegree,
+      gmapsFrequency,
+      mapType,
+      otherMaps,
+      geoGuessr,
+      markersData
+    };
+
+    console.log("Form data:", data);
+
+    // Sending JSON data to the server
+    fetch('https://test-projekt-server.de:3000/saveSurveyData', {  // Ensure HTTPS
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => {
+      if (response.ok) {
+        alert('Data saved successfully!');
+      } else {
+        alert('Failed to save data.');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error saving data.');
+    });
+    
+    document.getElementById("finished-message")!.style.display = 'block';
+    
+
+
+
   } else {
     changeView();
   }
@@ -423,64 +540,62 @@ function initTutorial() {
 }
 
 
+
 document.getElementById('start-button')!.onclick = () => {
   document.getElementById('start-message')!.style.display = 'none';
+  document.getElementById('end-form')!.style.display = 'block';
+};
+
+document.getElementById('bt-finish')!.onclick = () => {
+  document.getElementById('end-form')!.style.display = 'none';
   document.getElementById('tutorial')!.style.display = 'block';
   startGame();
   initTutorial();
 };
 
 
-// Wait for the DOM to be fully loaded before adding event listeners
+
+
 document.addEventListener("DOMContentLoaded", () => {
-  const finishButton = document.getElementById("bt-finish");
-  if (!finishButton) {
-    console.error("Finish button not found");
-    return;
+  
+  const submitButton = document.getElementById("submit-button");
+  if (submitButton) {
+    submitButton.addEventListener("click", submitMarker);
+  } else {
+    console.error("Submit button not found");
   }
 
-  finishButton.addEventListener("click", (event: Event) => {
-    event.preventDefault(); // Prevent default form submission
+  const expandButton = document.getElementById("expand-map-button");
+  if (expandButton) {
+    expandButton.addEventListener("click", toggleMapSize);
+  } else {
+    console.error("Expand map button not found");
+  }
 
-    // Collect form data
-    const form = document.getElementById("survey-form") as HTMLFormElement;
-    const formData = new FormData(form);
-    const data: { [key: string]: string | string[] } = {};
-    formData.forEach((value, key) => {
-      if (data[key]) {
-        if (Array.isArray(data[key])) {
-          (data[key] as string[]).push(value as string);
-        } else {
-          data[key] = [data[key] as string, value as string];
-        }
-      } else {
-        data[key] = value as string;
-      }
-    });
-    const jsonData = JSON.stringify(data, null, 2);
-    const jsonBlob = new Blob([jsonData], { type: 'application/json' });
 
-    const csvContent = markersData.join("\n");
-    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const startButton = document.getElementById("start-button");
+  if (startButton) {
+    startButton.addEventListener("click"); // wird startGame nicht zweimal gestartet? s.o.
+  } else {
+    console.error("Start button not found");
+  }
+  
+  const finishButton = document.getElementById("bt-finish");
+  if (finishButton) {
+    finishButton.addEventListener("click", startGame); // wird startGame nicht zweimal gestartet? s.o.
+  } else {
+    console.error("Finish button not found");
+  }
 
-    // Create zip file
-    const zip = new JSZip();
-    zip.file(`data_${userGroup}_${formattedDate}.csv`, csvBlob);
-    zip.file(`form-data_${userGroup}_${formattedDate}.json`, jsonBlob);
-    
-    zip.generateAsync({ type: "blob" }).then((content) => {
-      saveAs(content, `data_${userGroup}_${formattedDate}.zip`);
-    });
 
-    // Show finished message
-    document.getElementById("end-form")!.style.display = 'none';
-    document.getElementById("finished-message")!.style.display = 'block';
-  });
+
+  const modalOkButton = document.getElementById("modal-ok-button");
+  if (modalOkButton) {
+    modalOkButton.addEventListener("click", hideModal);
+  } else {
+    console.error("Modal OK button not found");
+  }
 });
-
-
-
-
 
 declare global {
   interface Window {

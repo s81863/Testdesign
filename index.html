@@ -8,16 +8,22 @@
   <head>
     <title>Geomedien Test</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <link rel="stylesheet" type="text/css" href="./style.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script type="module" src="./index.ts"></script>
+    <script>
+        // Ensure markersData is defined and accessible in the global scope
+        window.addEventListener('load', () => {
+            const markersData = window.markersData;
+            console.log(markersData); // Check if the data is correctly logged
+        });
+    </script>
   </head>
   <body>
 	<div id="start-message">
       <h1>Willkommen zu unserer Studie!</h1>
       <p>Im Folgenden f&uuml;hren Sie einen Test durch, bei dem Sie sich mit Hilfe von 360&deg;-Panoramen auf einer Karte orientieren m&uuml;ssen. 
-        Sie beginnen mit einem Tutorial, um sich mit der Umgebung und der Handhabung des Tests vertraut zu machen.
+        Sie beginnen mit einem Fragebogen, woraufhin ein Tutorial folgt, um sich mit der Umgebung und der Handhabung des Tests vertraut zu machen. Nach dem Tutorial wird der Test direkt beginnen.
 	  </p>
       <img src="images/BHT_Logo.png" alt="BHT Logo" class="img-fluid">	
       <button id="start-button">Start</button>
@@ -74,7 +80,7 @@
         <fieldset>
 
             <!-- Form Name -->
-            <legend>Abschlie&szlig;end folgen noch ein paar inhaltliche Fragen zur Einordnung Ihrer Ergebnisse</legend>
+            <legend>Vorab ein paar inhaltliche Fragen zur Einordnung Ihrer Ergebnisse</legend>
 
              <!-- Text input-->
              <div class="form-group">
@@ -254,24 +260,30 @@
   
             <!-- Multiple Radios -->
             <div class="form-group">
-                <label class="control-label" for="question-study-degree">Welchen Abschluss streben Sie an?</label>
+                <label class="control-label" for="question-study-degree">Welchen Bildungsabschluss streben Sie an/ haben Sie?</label>
                 <div>
                     <div class="radio">
                         <label for="question-study-degree-0">
                             <input type="radio" name="question-study-degree" id="question-study-degree-0" value="Bachelor" autocomplete="off">
-                            Bachelor
+                            Bachelor oder vergleichbar
                         </label>
                     </div>
                     <div class="radio">
                         <label for="question-study-degree-1">
                             <input type="radio" name="question-study-degree" id="question-study-degree-1" value="Master" autocomplete="off">
-                            Master
+                            Master oder vergleichbar
                         </label>
                     </div>
                     <div class="radio">
                         <label for="question-study-degree-2">
-                            <input type="radio" name="question-study-degree" id="question-study-degree-2" value="Keinen" autocomplete="off">
-                            Keinen
+                            <input type="radio" name="question-study-degree" id="question-study-degree-2" value="Doktor" autocomplete="off">
+                            Akademischer Doktorgrad
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label for="question-study-degree-3">
+                            <input type="radio" name="question-study-degree" id="question-study-degree-3" value="Anderen" autocomplete="off">
+                            Anderen
                         </label>
                     </div>
                 </div>
@@ -279,7 +291,7 @@
   
             <!-- Multiple Radios -->
             <div class="form-group">
-                <label class="control-label" for="question-gmaps1">Wie oft nutzen Sie Google Maps?</label>
+                <label class="control-label" for="question-gmaps1">Wie oft nutzen Sie Google Maps (oder eine vergleichbare App)?</label>
                 <div>
                     <div class="radio">
                         <label for="question-gmaps1-0">
@@ -316,11 +328,11 @@
             
             <!-- Multiple Radios (inline) -->
             <div class="form-group">
-                <label class="control-label" for="question-gmaps2">Welche Art der Hintergrundkarte nutzen Sie vorwiegend?</label>
+                <label class="control-label" for="question-gmaps2">Welche Art von Hintergrundkarte nutzen Sie in Google Maps (oder einer vergleichbaren App) vorwiegend?</label>
                 <div> 
                     <label class="radio-inline" for="question-gmaps2-0">
                         <input type="radio" name="question-gmaps2" id="question-gmaps2-0" value="Basemap" autocomplete="off">
-                        Basemap
+                        Basiskarte (Roadmap)
                     </label> 
                     <label class="radio-inline" for="question-gmaps2-1">
                         <input type="radio" name="question-gmaps2" id="question-gmaps2-1" value="Satellitenbild" autocomplete="off">
@@ -391,10 +403,18 @@
                 </div>
             </div>
 
+            <!-- Text input-->
+            <div class="form-group">
+                <label class="control-label" for="key-input">Haben Sie einen Testschl&uuml;ssel bekommen?</label>
+                <div> 
+                    <input id="key-input" name="key-input" type="text" placeholder="Testschl&uuml;ssel" class="form-control input-md" autocomplete="off">
+                </div>
+            </div>
+
             <!-- Button -->
             <div class="form-group">
                 <div>
-                    <button id="bt-finish" name="bt-finish" class="btn btn-primary" type="button">Fertig</button>
+                    <button id="bt-finish" name="bt-finish" class="btn btn-primary" type="button">Zum Test</button>
                 </div>
             </div>
 
@@ -428,6 +448,8 @@
         </div>
     </div>
 
+    
+
     <!-- 
       The `defer` attribute causes the callback to execute after the full HTML
       document has been parsed. For non-blocking uses, avoiding race conditions,
@@ -436,7 +458,7 @@
       for more information.
       -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initPano&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjWlsny1eebYEERnGLIrnOpeKqeRD0s1o&callback=initPano&v=weekly"
       defer
     ></script>
   </body>
